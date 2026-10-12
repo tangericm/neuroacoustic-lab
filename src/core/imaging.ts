@@ -1,5 +1,5 @@
 import type { Scenario, Phantom, Vec3, ChannelData, ReconstructionResult } from './types';
-import { distance, elementAmplitude, focusSequence, pathBetween, pixelPosition } from './physics';
+import { distance, elementAmplitude, focusSequence, pathBetween, pixelPosition, preparePathSolver } from './physics';
 import type { PropagationTable } from './physics';
 function random(seed:number){let a=seed|0;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 export function createPhantom(s:Scenario):Phantom {
@@ -13,7 +13,10 @@ export function createPhantom(s:Scenario):Phantom {
     if(positionM.reduce((sum,v,i)=>sum+(v/(s.medium.outerRadiiM[i]-inset))**2,0)>=.96)continue;
     scatterers.push({positionM,amplitude:a,kind:'speckle'});
   }
-  for(const offset of [[0,0,0],[.020,0,-.025],[-.018,0,.025]])scatterers.push({positionM:s.targetM.map((v,i)=>v+offset[i]) as Vec3,amplitude:8,kind:'point'});
+  for(const offset of [[0,0,0],[.020,0,-.025],[-.018,0,.025]]){
+    const positionM=s.targetM.map((v,i)=>v+offset[i]) as Vec3;
+    if(positionM.reduce((sum,v,i)=>sum+(v/(s.medium.outerRadiiM[i]-inset))**2,0)<1)scatterers.push({positionM,amplitude:8,kind:'point'});
+  }
   return {scatterers,cystCenterM,cystRadiusM,planeYM:s.targetM[1]};
 }
 export function acquireChannels(s:Scenario,phantom=createPhantom(s)):ChannelData {
@@ -21,10 +24,11 @@ export function acquireChannels(s:Scenario,phantom=createPhantom(s)):ChannelData
   const elements=receiveIds.map(id=>s.array.elements.find(e=>e.id===id)!);
   const txIndices=transmitIds.map(id=>receiveIds.indexOf(id)), nr=elements.length,nt=transmitIds.length;
   const count=phantom.scatterers.length, travel=new Float64Array(nr*count),amp=new Float64Array(nr*count),receiveAmp=new Float64Array(nr*count);let maxT=0;
+  const solve=preparePathSolver(s.medium,s.frequencyHz,s.mode==='homogeneous');
   for(let r=0;r<nr;r++)for(let k=0;k<count;k++){
-    const point=phantom.scatterers[k].positionM,p=pathBetween(elements[r].position,point,s.medium,s.frequencyHz,s.mode==='homogeneous');
+    const point=phantom.scatterers[k].positionM,p=solve(elements[r].position,point);
     travel[r*count+k]=p.travelTimeS; amp[r*count+k]=elementAmplitude(s,elements[r],point,p);
-    receiveAmp[r*count+k]=elementAmplitude(s,elements[r],point,pathBetween(point,elements[r].position,s.medium,s.frequencyHz,s.mode==='homogeneous'));maxT=Math.max(maxT,p.travelTimeS);
+    receiveAmp[r*count+k]=elementAmplitude(s,elements[r],point,solve(point,elements[r].position));maxT=Math.max(maxT,p.travelTimeS);
   }
   const samplingRateHz=s.frequencyHz*8,sigma=.7/s.frequencyHz,halfWidth=Math.ceil(4*sigma*samplingRateHz);
   let ns=1;while(ns<(2*maxT+8*sigma)*samplingRateHz)ns*=2;

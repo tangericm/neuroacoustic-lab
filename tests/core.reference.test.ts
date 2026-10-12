@@ -1,10 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import golden from '../public/reference/golden.json';
-import { defaultScenario, pathBetween, pistonDirectivity, fieldPlane } from '../src/core';
+import { defaultScenario, pathBetween, pistonDirectivity, fieldPlane, preparePathSolver } from '../src/core';
 import type { Vec3 } from '../src/core';
 if(golden.medium.outerRadiiM.length!==3)throw new Error('Oracle radii must have three axes');
 const medium={...golden.medium,outerRadiiM:golden.medium.outerRadiiM as Vec3};
 describe('independent Python float64 fixtures',()=>{
+  it('matches the independent oracle when medium geometry is prepared once for a batch',()=>{
+    for(const homogeneous of [false,true]){
+      const solve=preparePathSolver(medium,golden.frequencyHz,homogeneous);
+      for(const test of golden.paths.filter(p=>p.homogeneous===homogeneous)){
+        const actual=solve(test.start as Vec3,test.end as Vec3);
+        expect(actual.travelTimeS).toBeCloseTo(test.expected.travelTimeS,12);
+        expect(actual.amplitude).toBeCloseTo(test.expected.amplitude,8);
+        expect(actual.attenuationDb).toBeCloseTo(test.expected.attenuationDb,8);
+        for(const [key,value] of Object.entries(test.expected.layerLengthsM))expect(actual.layerLengthsM[key]).toBeCloseTo(value,10);
+      }
+    }
+  });
   it('matches travel, all shell lengths, attenuation and directional pressure',()=>{
     for(const test of golden.paths){
       const actual=pathBetween(test.start as Vec3,test.end as Vec3,medium,golden.frequencyHz,test.homogeneous);

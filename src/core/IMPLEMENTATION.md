@@ -6,7 +6,7 @@ SI units. Four nested ellipsoids subtract cumulative scalp, skull, and fluid thi
 
 Focused continuous-wave fields use sum-squared drive weights exactly one. Corrected delays align actual layered travel times; uncorrected delays use the independently adjustable assumed speed. Homogeneous propagation uses actual brain material parameters throughout the domain, without interfaces. Homogeneous focusing still uses the assumed speed.
 
-RF acquisition is a separate synthetic-aperture sequence: one element emits per shot, with equal shot amplitude `1/sqrt(number of shots)`. The focused CW apodization controls the field, while synthetic-aperture RF uses equal shot drive and uniform DAS receiving. Forward and returning pressure transmission factors use their respective directions. Scatterers occupy a seeded 0.8 mm thin slice with an empty cyst and three point reflectors. Gaussian-modulated RF is sampled at eight samples per carrier cycle. Seeded additive Gaussian noise has RMS equal to the noiseless global RF peak times `10^(noiseDb/20)`.
+RF acquisition is a separate synthetic-aperture sequence: one element emits per shot, with equal shot amplitude `1/sqrt(number of shots)`. The focused CW apodization controls the field, while synthetic-aperture RF uses equal shot drive and uniform DAS receiving. Forward and returning pressure transmission factors use their respective directions. Scatterers occupy a seeded 0.8 mm thin slice with an empty cyst and up to three point reflectors; secondary reflectors outside the acoustic brain are omitted. Gaussian-modulated RF is sampled at eight samples per carrier cycle. Seeded additive Gaussian noise has RMS equal to the noiseless global RF peak times `10^(noiseDb/20)`.
 
 FFT Hilbert transformation produces analytic channel quadrature. Complex DAS interpolates the same acquired RF and quadrature for either layered delays or homogeneous assumed-speed delays. No ground-truth phantom raster enters reconstruction.
 
@@ -48,3 +48,30 @@ Exact-target correction gain measurements:
 | [0.015, 0, 0.015] | 0.194577 | 0.434079 |
 | [0.045, 0, 0.020] | 0.981508 | 0.754389 |
 | [0, 0, -0.020] | 0.086828 | 0.191664 |
+
+## Review follow-up, 10:32
+
+Public `simulate` and `optimizePlacement` now validate geometry and acoustic inputs before any numerical cache work. Rejected cases include nonfinite positions, nonfinite or nonunit normals, nonfinite or out-of-range piston radii, nonfinite attenuation exponents, overlapping elements, insufficient head clearance, negative shell thickness, shell depths consuming an entire ellipsoid semiaxis, nonfinite outer radii, and zero enabled elements. A legitimate single-element configuration remains accepted. Point scatterers outside the brain are filtered for peripheral targets.
+
+Individual complex fields are returned element-major in `elementFields.real/imag`, with shape `[element count, size, size]`. They use the exact cached path and weighted focusing phase used for the coherent field; no independent normalization is applied. Disabled elements contribute zero, and summing individual complex arrays reproduces the coherent field within Float32 tolerance. Worker transfer discovery already includes these additional arrays; the persistent path cache is not transferred or copied.
+
+Test-first review reproduction: 12 failures before the changes, followed by 14/14 new checks passing. Fresh complete suite at 10:30:50: 42/42 passed across six files. `npx tsc -b` also passed after the concurrent UI integration completed.
+
+Isolated cold simulation after these changes: **791.215 ms** total (field 415.807 ms, RF 268.334 ms, reconstruction 105.032 ms). Returned numeric payload now **7,332,864 bytes**, including both individual complex arrays of shape `[64,96,96]`. A concurrent whole-suite run measured 1,174.207 ms under shared machine load; these remain measured snapshots, not guaranteed latency. Physical metrics remain unchanged.
+
+## Bounded performance pass, 10:39
+
+One optimization hoists immutable medium/frequency coefficients out of the per-ray loop: inverse squared ellipsoid radii, sound speeds, impedances, and frequency-specific attenuation per meter are prepared once for each propagation-grid or RF acquisition batch. Path intersections and amplitude equations are unchanged. Public `pathBetween` still computes a fresh prepared solver for its given inputs; no global medium-only cache was introduced. Existing propagation-table invalidation semantics remain unchanged.
+
+Before/after measurements used the same Vite-loaded Node engine, unchanged 96×96 grid, 64 elements, eight shots, and physical parameters. Each process ran four simulations with target x perturbed by successive 1 nm increments to force a fresh propagation table on every run. Only the first run in each process is also JIT-cold. Times vary with shared machine load.
+
+| Run | Before total ms | After total ms | Before field ms | After field ms |
+|---|---:|---:|---:|---:|
+| Fresh process first simulation | 787.240 | 594.650 | 413.907 | 243.497 |
+| 2, fresh path table | 761.589 | 563.917 | 381.904 | 233.637 |
+| 3, fresh path table | 1200.511 | 667.506 | 692.682 | 233.640 |
+| 4, fresh path table | 1231.594 | 638.371 | 695.181 | 260.322 |
+
+First-run total decreased about 24%, and field computation about 41%, in these local measurements. This does not claim a browser latency: root is checking the actual browser while rendering.
+
+Prepared-solver oracle regression was recorded RED before implementation, then GREEN. Fresh complete suite at 10:38:48: **46/46 tests passed**, including independent oracle paths, complex individual-field summation, and invalidation checks. `npx tsc -b` passed. Numerical payload size and all displayed physical metrics are unchanged apart from floating-point roundoff at approximately 1e-15. No numerical approximation, grid reduction, or further performance refactor was introduced.

@@ -4,29 +4,38 @@ export const distance=(a:Vec3,b:Vec3)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])
 type Layer='water'|'scalp'|'skull'|'fluid'|'brain';
 const names:Layer[]=['water','scalp','skull','fluid','brain'];
 export function pathBetween(start:Vec3,end:Vec3,medium:Medium,frequencyHz:number,homogeneous=false):PathResult {
+  return preparePathSolver(medium,frequencyHz,homogeneous)(start,end);
+}
+/** Batch-local immutable coefficients; callers rebuild after any material/frequency edit. */
+export function preparePathSolver(medium:Medium,frequencyHz:number,homogeneous=false):(start:Vec3,end:Vec3)=>PathResult {
+  const depths=[0,medium.scalpThicknessM,medium.scalpThicknessM+medium.skullThicknessM,medium.scalpThicknessM+medium.skullThicknessM+medium.fluidThicknessM];
+  const boundaries=depths.map(depth=>medium.outerRadiiM.map(r=>1/((r-depth)*(r-depth))));
+  const speeds=names.map(name=>medium.materials[name].soundSpeedMps);
+  const impedances=names.map((name,i)=>medium.materials[name].densityKgM3*speeds[i]);
+  const attenuation=names.map(name=>{const m=medium.materials[name];return 100*m.attenuationDbCmAtMHz*(frequencyHz/1e6)**m.attenuationPower;});
+  return (start:Vec3,end:Vec3):PathResult=>{
   const d:Vec3=[end[0]-start[0],end[1]-start[1],end[2]-start[2]],lengthM=Math.hypot(...d);
   const layerLengthsM:Record<string,number>={water:0,scalp:0,skull:0,fluid:0,brain:0};
   let travelTimeS=0,attenuationDb=0,transmission=1;
-  const depths=[0,medium.scalpThicknessM,medium.scalpThicknessM+medium.skullThicknessM,medium.scalpThicknessM+medium.skullThicknessM+medium.fluidThicknessM];
-  const boundaries=depths.map(depth=>medium.outerRadiiM.map(r=>r-depth));
   const cuts=[0,1];
-  if(!homogeneous)for(const radii of boundaries){
-    let a=0,b=0,c=-1;for(let k=0;k<3;k++){const inv=1/(radii[k]*radii[k]);a+=d[k]*d[k]*inv;b+=2*start[k]*d[k]*inv;c+=start[k]*start[k]*inv;}
+  if(!homogeneous)for(const inverseRadiiSquared of boundaries){
+    let a=0,b=0,c=-1;for(let k=0;k<3;k++){const inv=inverseRadiiSquared[k];a+=d[k]*d[k]*inv;b+=2*start[k]*d[k]*inv;c+=start[k]*start[k]*inv;}
     const disc=b*b-4*a*c;if(a>0&&disc>0){const root=Math.sqrt(disc);for(const t of [(-b-root)/(2*a),(-b+root)/(2*a)])if(t>1e-10&&t<1-1e-10)cuts.push(t);}
   }
-  cuts.sort((a,b)=>a-b);let previous:Layer|undefined;
+  cuts.sort((a,b)=>a-b);let previous=-1;
   for(let i=1;i<cuts.length;i++){
-    const t=(cuts[i]+cuts[i-1])/2;let layer:Layer='brain';
+    const t=(cuts[i]+cuts[i-1])/2;let layer=4;
     if(!homogeneous)for(let j=0;j<boundaries.length;j++){
-      const r=boundaries[j];let norm=0;for(let k=0;k<3;k++)norm+=((start[k]+t*d[k])/r[k])**2;
-      if(norm>=1){layer=names[j];break;}
+      const inv=boundaries[j];let norm=0;for(let k=0;k<3;k++){const v=start[k]+t*d[k];norm+=v*v*inv[k];}
+      if(norm>=1){layer=j;break;}
     }
-    const length=(cuts[i]-cuts[i-1])*lengthM,m=medium.materials[layer];layerLengthsM[layer]+=length;
-    travelTimeS+=length/m.soundSpeedMps;attenuationDb+=length*100*m.attenuationDbCmAtMHz*(frequencyHz/1e6)**m.attenuationPower;
-    if(previous&&previous!==layer){const p=medium.materials[previous],z1=p.densityKgM3*p.soundSpeedMps,z2=m.densityKgM3*m.soundSpeedMps;transmission*=2*z2/(z1+z2);}
+    const length=(cuts[i]-cuts[i-1])*lengthM;layerLengthsM[names[layer]]+=length;
+    travelTimeS+=length/speeds[layer];attenuationDb+=length*attenuation[layer];
+    if(previous>=0&&previous!==layer)transmission*=2*impedances[layer]/(impedances[previous]+impedances[layer]);
     previous=layer;
   }
   return {travelTimeS,amplitude:transmission*10**(-attenuationDb/20)*.1/Math.max(.001,lengthM),attenuationDb,lengthM,layerLengthsM};
+  };
 }
 // Convergent J1 series; the supported element/frequency range has ka <= 18.
 export function pistonDirectivity(x:number):number {
@@ -64,18 +73,20 @@ export function createPropagationTable(s:Scenario,size=s.gridSize):PropagationTa
   const key=JSON.stringify([size,s.targetM,s.fieldOfViewM,s.frequencyHz,s.medium,s.mode==='homogeneous',s.array.elements.map(e=>[e.position,e.normal,e.radiusM])]);
   if(lastTable?.key===key)return lastTable.table;
   const n=s.array.elements.length,times=new Float64Array(size*size*n),amplitudes=new Float32Array(times.length);
+  const solve=preparePathSolver(s.medium,s.frequencyHz,s.mode==='homogeneous');
   for(let z=0;z<size;z++)for(let x=0;x<size;x++){
     const point=pixelPosition(s,x,z,size),base=(z*size+x)*n;
-    for(let e=0;e<n;e++){const element=s.array.elements[e],p=pathBetween(element.position,point,s.medium,s.frequencyHz,s.mode==='homogeneous');times[base+e]=p.travelTimeS;amplitudes[base+e]=elementAmplitude(s,element,point,p);}
+    for(let e=0;e<n;e++){const element=s.array.elements[e],p=solve(element.position,point);times[base+e]=p.travelTimeS;amplitudes[base+e]=elementAmplitude(s,element,point,p);}
   }
   const table={size,times,amplitudes};lastTable={key,table};return table;
 }
-export function fieldPlane(s:Scenario,q=focusSequence(s),size=s.gridSize,table?:PropagationTable):FieldPlane {
+export function fieldPlane(s:Scenario,q=focusSequence(s),size=s.gridSize,table?:PropagationTable,individual?:{size:number;real:Float32Array;imag:Float32Array}):FieldPlane {
   const real=new Float32Array(size*size),imag=new Float32Array(size*size),magnitude=new Float32Array(size*size);let peak=0;
   for(let z=0;z<size;z++)for(let x=0;x<size;x++){
     const i=z*size+x;let r=0,j=0;
     if(table){const base=i*s.array.elements.length;for(let e=0;e<s.array.elements.length;e++){
-      const phase=-TAU*s.frequencyHz*(table.times[base+e]+q.delaysS[e]),a=q.weights[e]*table.amplitudes[base+e];r+=a*Math.cos(phase);j+=a*Math.sin(phase);
+      const phase=-TAU*s.frequencyHz*(table.times[base+e]+q.delaysS[e]),a=q.weights[e]*table.amplitudes[base+e],er=a*Math.cos(phase),ei=a*Math.sin(phase);r+=er;j+=ei;
+      if(individual){individual.real[e*size*size+i]=er;individual.imag[e*size*size+i]=ei;}
     }}else [r,j]=complexAt(s,q,pixelPosition(s,x,z,size));
     real[i]=r;imag[i]=j;magnitude[i]=Math.hypot(r,j);peak=Math.max(peak,magnitude[i]);
   }

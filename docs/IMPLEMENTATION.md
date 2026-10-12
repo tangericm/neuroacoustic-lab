@@ -32,9 +32,11 @@ Ruling: coordinate independent core, UI, and offline-reference work through the 
 Published on October 12, 2026:
 
 - Source: https://github.com/tangericm/ultrasound-lab
-- Production: https://ultrasound-lab-six.vercel.app
+- Production: https://neuroacoustic-lab.vercel.app
 - Verified implementation commit: `3c13c1a`; JavaScript asset: `index-BAtRLtqT.js`.
 - GitHub CI: https://github.com/tangericm/ultrasound-lab/actions/runs/38288748082 — both browser-core and float64-reference jobs passed on Ubuntu.
 - An unauthenticated HTTP request returned 200. The live browser loaded the atlas, computed the default case in 854 ms, and displayed the frozen full-wave comparisons. No new errors or warnings appeared for the deployed origin.
 - The live screenshot is retained in `docs/figures/workspace.jpg`.
 - Vercel project creation, CLI production deployment, and alias succeeded. The GitHub integration connection failed twice; automatic push deployment is not claimed. GitHub CI remains connected. Future publication uses the linked Vercel CLI until that integration is enabled.
+
+Domain follow-up on October 12: the user connected the GitHub repository. The project API confirms `tangericm/ultrasound-lab`, production branch `main`. The unsuffixed `ultrasound-lab.vercel.app` address was already in use. Added verified production domain `neuroacoustic-lab.vercel.app` to the existing project and configured the initial `ultrasound-lab-six.vercel.app` address to redirect with HTTP 308. Updated the README and GitHub homepage to the new domain. This changes publication metadata and routing; the numerical implementation is unchanged.

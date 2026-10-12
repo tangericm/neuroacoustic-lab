@@ -1,6 +1,6 @@
 # Neuroacoustic Lab
 
-[Open the live demo](https://ultrasound-lab-six.vercel.app) · [Validation and reproducibility](docs/REPRODUCIBILITY.md)
+[Open the live demo](https://neuroacoustic-lab.vercel.app) · [Validation and reproducibility](docs/REPRODUCIBILITY.md)
 
 An interactive, browser-based demonstration of how array geometry, layered acoustic assumptions, transmit timing, and receive reconstruction affect a synthetic ultrasound experiment. The project connects a 3D array and anatomical context to a deterministic scalar propagation model and a seeded synthetic-aperture acquisition.
 
@@ -53,4 +53,4 @@ The application code in this repository is licensed under MIT; see [LICENSE](LIC
 
 For a manual Vercel deployment, import the GitHub repository, select the Vite framework preset, set the build command to `npm run build`, and set the output directory to `dist`. No server-side runtime or account backend is required.
 
-The first production build is published at [ultrasound-lab-six.vercel.app](https://ultrasound-lab-six.vercel.app). GitHub Actions checks the core, independent Python reference tests, and static build on each push. The Vercel GitHub connection could not be established in the release session, so pushes currently require a separate `npx vercel deploy --prod` from a linked checkout to update the live site.
+The production demo is published at [neuroacoustic-lab.vercel.app](https://neuroacoustic-lab.vercel.app). GitHub Actions checks the core, independent Python reference tests, and static build on each push. Vercel is connected to `tangericm/ultrasound-lab` with `main` as the production branch, so pushes also trigger production deployments. The original `ultrasound-lab-six.vercel.app` address redirects to the current domain.

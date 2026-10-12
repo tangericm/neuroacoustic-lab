@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import numpy as np
+from reference.generate_fullwave import cache_fingerprint
 
 
 def test_saved_fullwave_runs_are_finite_and_have_grid_sensitivity_evidence():
@@ -41,3 +42,15 @@ def test_slab_ray_uses_the_same_free_field_amplitude_scale():
     free={r['dxM']:r['rayAmplitudeScaleFromFreeField'] for r in data['cases'][0]['runs']}
     for run in data['cases'][1]['runs']:
         assert np.isclose(run['rayAmplitudeScaleFromFreeField'],free[run['dxM']])
+
+
+def test_each_saved_run_retains_its_verified_execution_identity():
+    data=json.loads(Path('public/reference/fullwave.json').read_text())
+    for case in data['cases']:
+        for run in case['runs']:
+            assert 'provenance' in run, 'Saved numerical run has no original provenance'
+            p=run['provenance']
+            assert p['computedUtc']
+            assert p['fingerprint']==cache_fingerprint({'config':p['config'],'execution':p['execution']})
+            assert p['execution']['sourceSha256']==data['provenance']['sourceSha256']
+            assert p['execution']['backend']==data['provenance']['backend']

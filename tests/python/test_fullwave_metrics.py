@@ -32,6 +32,7 @@ def test_planar_path_axis_time_and_absorption():
 def test_free_field_focal_location_detects_source_sensor_ordering_errors():
     fixture=Path('.work/fullwave/free-0.000625-uncorrected.json')
     if not fixture.exists():pytest.skip('Optional generated k-Wave run cache absent')
-    run=json.loads(fixture.read_text())
+    cached=json.loads(fixture.read_text())
+    run=cached.get('run',cached)
     assert run['metrics']['focalErrorMm'] < 6
     assert run['metrics']['targetAmplitude']/run['metrics']['peakAmplitude'] > .6

@@ -160,10 +160,58 @@ def simulate(dx,slab,mode,backend='python',device='gpu',duration=90e-6):
                 plane=dict(xMm=(xp*1000).tolist(),zMm=(zp*1000).tolist(),pressure=plane.ravel().tolist(),rayPressure=ray.ravel().tolist()))
 
 
+def cache_fingerprint(identity):
+    return hashlib.sha256(json.dumps(identity,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+
+
+def read_cached_run(file,identity):
+    """Reject legacy or stale data; retain provenance from the actual run."""
+    try:
+        cached=json.loads(file.read_text())
+        expected=cache_fingerprint(identity)
+        if cached.get('cacheVersion')!=1 or cached.get('fingerprint')!=expected:
+            return None
+        if cache_fingerprint(cached['identity'])!=expected:
+            return None
+        run=cached['run']
+        if run['provenance']['fingerprint']!=expected:
+            return None
+        return run
+    except (OSError,ValueError,KeyError,TypeError):
+        return None
+
+
+def execution_context(backend,device):
+    import kwave
+    package=Path(kwave.__file__).parent
+    sources=[Path(__file__),Path(__file__).with_name('oracle.py')]
+    solver_sources=[package/'kspaceFirstOrder.py',package/'solvers'/'kspace_solver.py',package/'solvers'/'cpp_simulation.py']
+    result=dict(backend=backend,device=device,version=kwave.__version__,python=platform.python_version(),numpy=np.__version__,
+                scipy=importlib.metadata.version('scipy'),precision='float32',
+                sourceSha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
+                solverSourceSha256={str(p.relative_to(package)):hashlib.sha256(p.read_bytes()).hexdigest() for p in solver_sources})
+    if device=='gpu':
+        result['hardware']=subprocess.check_output(['nvidia-smi','--query-gpu=name,driver_version','--format=csv,noheader'],text=True).strip()
+        if backend=='python':
+            import cupy
+            result.update(cupy=cupy.__version__,cudaRuntime=cupy.cuda.runtime.runtimeGetVersion(),cudaDriver=cupy.cuda.runtime.driverGetVersion())
+    else:result['hardware']=platform.processor() or platform.machine()
+    if backend=='cpp':
+        binary=kwave.BINARY_PATH/('kspaceFirstOrder-CUDA' if device=='gpu' else 'kspaceFirstOrder-OMP')
+        if platform.system()=='Windows':binary=binary.with_suffix('.exe')
+        result.update(binaryVersion=kwave.BINARY_VERSION,binarySha256=hashlib.sha256(binary.read_bytes()).hexdigest())
+    return result
+
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--backend',default='python');parser.add_argument('--device',default='gpu');parser.add_argument('--force',action='store_true')
     args=parser.parse_args()
     cache=ROOT/'.work'/'fullwave';cache.mkdir(parents=True,exist_ok=True)
+    execution=execution_context(args.backend,args.device)
+    positions,normals=elements()
+    configuration=dict(frequencyHz=FREQUENCY,targetM=TARGET.tolist(),positionsM=positions.tolist(),normals=normals.tolist(),elementRadiusM=RADIUS,
+                       elementWeight=.25,materials=MATERIALS,attenuationPower=ALPHA_POWER,durationUs=90,recordLastUs=20,sourceRampCycles=8,
+                       domainMm=[50,50,80],slabBoundsMm=[22,28.5],pmlCells=12,cfl=.2)
     cases=[]
     for slab in [False,True]:
         runs=[]
@@ -171,12 +219,17 @@ def main():
             for mode in (['uncorrected','corrected'] if slab else ['uncorrected']):
                 key=f'{"slab" if slab else "free"}-{dx}-{mode}'
                 file=cache/(key+'.json')
-                if file.exists() and not args.force: run=json.loads(file.read_text())
-                else:
+                identity=dict(config={**configuration,'dxM':dx,'slab':slab,'mode':mode},execution=execution)
+                run=read_cached_run(file,identity) if not args.force else None
+                if run is None:
+                    if file.exists() and not args.force:print('STALE CACHE '+key+' (configuration, source or execution provenance changed); rerunning',flush=True)
                     print('RUN '+key,flush=True)
                     run=simulate(dx,slab,mode,args.backend,args.device)
-                    file.write_text(json.dumps(run,allow_nan=False))
+                    fingerprint=cache_fingerprint(identity)
+                    run['provenance']=dict(computedUtc=datetime.now(timezone.utc).isoformat(),fingerprint=fingerprint,**identity)
+                    file.write_text(json.dumps(dict(cacheVersion=1,identity=identity,fingerprint=fingerprint,run=run),allow_nan=False))
                     print(json.dumps({k:run[k] for k in ['dxM','runtimeS','metrics']}),flush=True)
+                else:print('REUSE '+key+' (validated '+run['provenance']['fingerprint'][:12]+')',flush=True)
                 runs.append(run)
         cases.append(dict(id='slab' if slab else 'free',label='Water / 6.5 mm bone / brain' if slab else 'Homogeneous water',runs=runs))
     # One free-field amplitude scale per grid; no skull amplitude or phase fit.
@@ -206,12 +259,11 @@ def main():
                 targetAmplitudeRelativeChange=float((fine['metrics']['targetAmplitude']-coarse['metrics']['targetAmplitude'])/fine['metrics']['targetAmplitude']),
                 focalPositionChangeMm=float(np.linalg.norm(np.array(coarse['metrics']['focalPositionM'])-fine['metrics']['focalPositionM'])*1000),
                 lateralFwhmChangeMm=fine['metrics']['lateralFwhmMm']-coarse['metrics']['lateralFwhmMm']))
-    import kwave
-    positions,normals=elements()
-    result=dict(schemaVersion=1,provenance=dict(solver='k-Wave k-space pseudospectral 3D compressional',version=kwave.__version__,binaryVersion=kwave.BINARY_VERSION,
-        backend=args.backend,device=args.device,hardware=subprocess.check_output(['nvidia-smi','--query-gpu=name','--format=csv,noheader'],text=True).strip(),seed=1729,
-        generatedUtc=datetime.now(timezone.utc).isoformat(),python=platform.python_version(),numpy=np.__version__,scipy=importlib.metadata.version('scipy'),
-        sourceSha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__),Path(__file__).with_name('oracle.py')]},
+    recorded_execution=cases[0]['runs'][0]['provenance']['execution']
+    if any(r['provenance']['execution']!=recorded_execution for c in cases for r in c['runs']):
+        raise RuntimeError('Cannot package runs with mixed execution provenance')
+    result=dict(schemaVersion=1,provenance=dict(solver='k-Wave k-space pseudospectral 3D compressional',**recorded_execution,seed=1729,
+        generatedUtc=datetime.now(timezone.utc).isoformat(),
         sources=['https://k-wave-python.readthedocs.io/en/latest/','https://github.com/waltsims/k-wave-python','https://github.com/waltsims/kspacefirstorder-unified/releases/tag/v1.4.2']),
         config=dict(frequencyHz=FREQUENCY,targetM=TARGET.tolist(),elements=[dict(positionM=p.tolist(),normal=n.tolist(),radiusM=RADIUS,weight=.25) for p,n in zip(positions,normals)],
             geometry='Fixed 16 finite-disc spherical cap, radius 40 mm; slab z=22..28.5 mm; independent from interactive head geometry',domainMm=[50,50,80],materials=MATERIALS,

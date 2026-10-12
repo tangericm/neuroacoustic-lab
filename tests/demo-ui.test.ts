@@ -5,9 +5,10 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { defaultScenario } from '../src/core/scenario';
 import type { ImagingDemoFixture } from '../src/demo/types';
 const mocks=vi.hoisted(()=>({focus:vi.fn(),imaging:vi.fn(),paint:vi.fn(),traces:vi.fn()}));
-vi.mock('../src/demo/loaders',()=>({loadFocusDemo:mocks.focus,loadImagingDemo:mocks.imaging}));
+vi.mock('../src/demo/loaders',()=>({loadFocusDemo:mocks.focus,loadImagingDemo:mocks.imaging,loadFlowDemo:mocks.imaging}));
 vi.mock('../src/demo/display',async importOriginal=>({...await importOriginal<typeof import('../src/demo/display')>(),paintEnvelope:mocks.paint,drawDemoTraces:mocks.traces}));
 vi.mock('../src/demo/FocusedUltrasound',()=>({default:()=>createElement('div',null,'Fixed focused pulse')}));
+vi.mock('../src/demo/FlowImagingDemo',()=>({default:()=>createElement('section',null,'Separate acquisition',createElement('button',null,'Form image'))}));
 vi.mock('../src/LabApp',()=>({default:()=>createElement('div',null,'Advanced laboratory')}));
 import App from '../src/App';
 import ImagingDemo from '../src/demo/ImagingDemo';
@@ -29,7 +30,7 @@ it('starts with focused ultrasound, loads imaging only when selected, and expose
   await renderApp();expect(container.textContent).toContain('Fixed focused pulse');expect(mocks.focus).toHaveBeenCalled();expect(mocks.imaging).not.toHaveBeenCalled();
   expect(container.querySelector('input,select')).toBeNull();
   await act(async()=>{button('Ultrasound imaging')!.click();await new Promise(resolve=>setTimeout(resolve,20));});
-  expect(container.textContent).toContain('Separate acquisition');expect(button('Echoes')).toBeDefined();expect(mocks.imaging).toHaveBeenCalledTimes(1);
+  expect(container.textContent).toContain('Separate acquisition');expect(button('Form image')).toBeDefined();expect(mocks.imaging).toHaveBeenCalledTimes(1);
 });
 it.each(['/?view=lab','/#s=legacy-scenario'])('retains advanced URL compatibility for %s',async url=>{
   window.history.replaceState({},'',url);await renderApp();expect(container.textContent).toContain('Advanced laboratory');expect(mocks.focus).not.toHaveBeenCalled();

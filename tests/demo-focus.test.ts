@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FocusTimeline, createBoundaryGeometry, createFocusTexture, focusSnapshotFrame, paintFocusFrame, tickFocusPlayback } from '../src/demo/focusSceneUtils';
+import { FocusTimeline, createBoundaryGeometry, createFocusTexture, focusSnapshotFrame, gaussianAmplitudeBandwidthHz, paintFocusFrame, tickFocusPlayback } from '../src/demo/focusSceneUtils';
 import type { FocusDemoFixture } from '../src/demo/types';
 import { defaultScenario } from '../src/core/scenario';
 import { Vector2 } from 'three';
@@ -66,7 +66,7 @@ describe('cached coherent pulse-envelope display', () => {
   it('reuses one texture buffer, preserves a fixed amplitude scale, and leaves zero amplitude transparent', () => {
     const texture = createFocusTexture(2);
     const buffer = texture.image.data;
-    const frames = new Int16Array([0, 32767, 16000, 1000, 0, 32767, 16000, 1000]);
+    const frames = new Int16Array([0, 32767, 16000, 1000, 0, 16000, 16000, 1000]);
     paintFocusFrame(texture, frames, 0, 2);
     const first = [...buffer];
     expect(first[3]).toBe(0);
@@ -74,7 +74,10 @@ describe('cached coherent pulse-envelope display', () => {
     expect(first[11]).toBeLessThan(first[7]);
     paintFocusFrame(texture, frames, 1, 2);
     expect(texture.image.data).toBe(buffer);
-    expect([...buffer]).toEqual(first);
+    // Unchanged amplitudes retain their pixels even when the next frame has a lower peak.
+    expect([...buffer.slice(8)]).toEqual(first.slice(8));
+    expect([...buffer.slice(4, 8)]).toEqual(first.slice(8, 12));
+    expect(buffer[7]).toBeLessThan(first[7]);
     texture.dispose();
   });
   it('maps the superior plane edge to encoded row zero through the actual shader UV matrix', () => {
@@ -92,5 +95,16 @@ describe('cached coherent pulse-envelope display', () => {
     expect(points.getY(0)).toBeCloseTo(-.001, 6);
     expect(points.getZ(24)).toBeCloseTo(.09, 6);
     geometry.dispose();
+  });
+});
+
+describe('Gaussian pulse explanation', () => {
+  it('reports amplitude-spectrum FWHM rather than the narrower power-spectrum width', () => {
+    const sigmaS = 1.4e-6;
+    const bandwidthHz = gaussianAmplitudeBandwidthHz(sigmaS);
+    expect(bandwidthHz).toBeCloseTo(267700.9, 1);
+    // Fourier amplitude of g(u)=exp(-u²/(2σ²)) is half at ±FWHM/2.
+    const edgeAmplitude = Math.exp(-2 * Math.PI ** 2 * sigmaS ** 2 * (bandwidthHz / 2) ** 2);
+    expect(edgeAmplitude).toBeCloseTo(.5, 12);
   });
 });

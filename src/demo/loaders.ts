@@ -1,5 +1,6 @@
 import { isScenario } from '../hooks/uiUtils';
 import type { DemoPlane, FocusDemoFixture, ImagingDemoFixture } from './types';
+import type { FlowFixture } from '../core/flow/types';
 
 const vector = (v: unknown): v is number[] => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
 const finiteArray = (v: unknown, length?: number): v is number[] => Array.isArray(v) && (length === undefined || v.length === length) && v.every(Number.isFinite);
@@ -63,4 +64,49 @@ export function loadImagingDemo() {
     if (fixture.version !== 1 || fixture.kind !== 'synthetic-aperture-imaging' || !validPlane(fixture.plane) || !isScenario(fixture.scenario) || !Array.isArray(shape) || shape.length !== 3 || shape.some(n => !Number.isInteger(n) || n <= 0) || !Number.isFinite(fixture.samplingRateHz) || fixture.samplingRateHz <= 0 || !Number.isFinite(fixture.timeOriginS) || !finiteArray(fixture.transmitIds, shape[0]) || !finiteArray(fixture.receiveIds, shape[1]) || !finiteArray(fixture.calibratedEnvelope, np) || !finiteArray(fixture.uncalibratedEnvelope, np) || !Number.isFinite(fixture.display?.referencePeak) || fixture.display.referencePeak <= 0 || !Number.isFinite(fixture.display.floorDb) || fixture.display.floorDb >= 0 || !finiteArray(fixture.traceTimeUs, shape[2]) || !finiteArray(fixture.alignedTimeUs) || !fixture.alignedTimeUs.length || !Array.isArray(fixture.traces) || !fixture.traces.length || fixture.traces.some(t => !Number.isFinite(t.arrivalS) || !fixture.receiveIds.includes(t.receiverId) || !finiteArray(t.raw, fixture.traceTimeUs.length) || !finiteArray(t.aligned, fixture.alignedTimeUs.length)) || !Array.isArray(fixture.partials) || !fixture.partials.length || fixture.partials.some((p, i) => !Number.isInteger(p.receivers) || p.receivers <= (i ? fixture.partials[i - 1].receivers : 0) || p.receivers > shape[1] || !finiteArray(p.envelope, np)) || fixture.partials.at(-1)!.receivers !== shape[1] || !Array.isArray(fixture.pointTargetsM) || fixture.pointTargetsM.some(p => !vector(p))) throw new Error('The imaging demonstration has invalid data.');
     return fixture;
   })().catch(error => { imagingPromise = undefined; throw error; });
+}
+
+let flowPromise: Promise<FlowFixture> | undefined;
+/** The independent imaging probe has its own contract; focused-head constraints do not apply. */
+export function loadFlowDemo(): Promise<FlowFixture> {
+  return flowPromise ??= (async () => {
+    const fixture = await json<FlowFixture>('/demo/flow.json');
+    const c = fixture.config, plane = fixture.plane;
+    const np = plane?.size ** 2, shape = fixture.acquisition?.channelShape;
+    const invalid = () => { throw new Error('The flow imaging demonstration has invalid data.'); };
+    if (fixture.version !== 1 || fixture.kind !== 'temporal-flow-imaging' || !validPlane(plane) || plane.rowDirection !== 'decreasing-z' || !c ||
+      !Number.isInteger(c.frames) || c.frames < 4 || c.frames > 64 || c.size !== plane.size ||
+      !Number.isInteger(c.elementCount) || c.elementCount < 2 || c.elementCount > 128 ||
+      !Number.isInteger(c.samples) || c.samples < 32 || c.samples > 8192 || !Number.isFinite(c.seed) ||
+      [c.frequencyHz, c.soundSpeedMps, c.samplingRateHz, c.frameIntervalS, c.elementPitchM, c.elementRadiusM, c.extentM].some(v => !Number.isFinite(v) || v <= 0) ||
+      [c.tissueDisplacementM, c.bloodSpeedMps, c.noiseRmsRelative, c.probeZM, c.centerZM].some(v => !Number.isFinite(v)) ||
+      !Number.isInteger(c.clutterRank) || c.clutterRank < 0 || c.clutterRank >= c.frames ||
+      !Array.isArray(shape) || shape.length !== 4 || shape[0] !== c.frames || shape[1] !== 1 || shape[2] !== c.elementCount || shape[3] !== c.samples ||
+      !finiteArray(fixture.acquisition.frameTimesS, c.frames) || !Number.isFinite(fixture.acquisition.timeOriginS) || !Number.isFinite(fixture.acquisition.noiseRms)) invalid();
+    const cine = fixture.cine, power = fixture.power, flow = fixture.flow;
+    if (!cine || !finiteArray(cine.frameIndices) || !cine.frameIndices.length || cine.frameIndices.length > c.frames ||
+      cine.frameIndices.some((n, i) => !Number.isInteger(n) || n < 0 || n >= c.frames || (i > 0 && n <= cine.frameIndices[i - 1])) ||
+      !finiteArray(cine.timeMs, cine.frameIndices.length) || !Array.isArray(cine.bmode) || cine.bmode.length !== cine.frameIndices.length ||
+      cine.bmode.some(frame => !finiteArray(frame, np) || frame.some(v => v < 0 || v > 255)) ||
+      !Number.isFinite(cine.referenceAmplitude) || cine.referenceAmplitude <= 0 || !Number.isFinite(cine.floorDb) || cine.floorDb >= 0 ||
+      !power || !finiteArray(power.before, np) || !finiteArray(power.after, np) || [...power.before, ...power.after].some(v => v < 0) ||
+      !Number.isFinite(power.referencePower) || power.referencePower <= 0 || !Number.isFinite(power.floorDb) || power.floorDb >= 0 ||
+      !flow || !finiteArray(flow.velocityMps, np) || !finiteArray(flow.coherence, np) || !finiteArray(flow.valid, np) ||
+      flow.valid.some(v => v !== 0 && v !== 1) || flow.coherence.some(v => v < 0 || v > 1.000001) ||
+      !Number.isFinite(flow.nyquistMps) || flow.nyquistMps <= 0 || typeof flow.positiveDirection !== 'string' ||
+      !Number.isFinite(flow.powerThreshold) || !Number.isFinite(flow.coherenceThreshold)) invalid();
+    const truth = fixture.truth, displacement = fixture.displacement, spectrum = fixture.spectrum;
+    if (!truth || !Array.isArray(truth.vessels) || truth.vessels.length > 64 || truth.vessels.some(v =>
+      typeof v.id !== 'string' || !Number.isFinite(v.radiusM) || v.radiusM <= 0 || !Number.isFinite(v.speedMps) ||
+      !Array.isArray(v.pointsM) || v.pointsM.length < 2 || v.pointsM.some(p => !finiteArray(p, 2))) ||
+      !displacement || !Array.isArray(displacement.points) || displacement.points.some(p =>
+        [p.xM, p.zM, p.dzM, p.confidence].some(v => !Number.isFinite(v)) || typeof p.valid !== 'boolean') ||
+      !spectrum || !finiteArray(spectrum.singularValues, c.frames) || spectrum.removedModes !== c.clutterRank ||
+      !Array.isArray(fixture.methods) || fixture.methods.length < 4 || fixture.methods.some(m =>
+        [m.title, m.formula, m.variables, m.explanation, m.limitation].some(v => typeof v !== 'string')) ||
+      !Array.isArray(fixture.metrics) || fixture.metrics.some(m => m.value !== null && !Number.isFinite(m.value)) ||
+      !fixture.rf || !finiteArray(fixture.rf.timeUs) || !Array.isArray(fixture.rf.traces) || fixture.rf.traces.some(t => !finiteArray(t.values, fixture.rf.timeUs.length)) ||
+      !fixture.provenance || !Array.isArray(fixture.provenance.assumptions) || !Array.isArray(fixture.provenance.sources)) invalid();
+    return fixture;
+  })().catch(error => { flowPromise = undefined; throw error; });
 }

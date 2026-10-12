@@ -1,0 +1,280 @@
+{
+  "version": 1,
+  "generatedUtc": "2026-10-12T19:56:54.303Z",
+  "sourceHashes": {
+    "src/core/flow/types.ts": "42c907101b8c368f898f8182b3962d4a65e56e05ca73fa80f4b09e4ae13d3c98",
+    "src/core/flow/acquisition.ts": "470663262c08b094b621d7c0167fcf83a1fea65bbcebe277a7c06974afad9da0",
+    "src/core/flow/processing.ts": "6cf6a09ee9314b7ddd015c76928f9a9c3789da28aee40a253078b23db29b6bf2",
+    "src/core/flow/motion.ts": "a9f258e77295b8e90d67f6eb20e01521af03a01600ba4b68c62cbc08e0960e6a",
+    "src/core/imaging.ts": "8d10ca2ecfa1c60f035a31d866e0ce511b89b8a54c17593bfc1f3e552f29161a",
+    "src/core/physics.ts": "39085831336791d0a7c00a45ae614e358275267c34f7903053b9af1a85bf197b",
+    "src/core/scenario.ts": "562c22d9d8bd7ca1eb4518f718ff3899038a4efc965d912cbf32f7f84aafd278",
+    "src/core/types.ts": "204cc3514cf89db3a8cb817d4562411c68d978335352fa5769b5c9368d996be1",
+    "src/demo/generate-flow-fixture.ts": "a232c7a20a06223182893be1d3ff900ce814279ae1e3d8d21eb4818f43b43f38",
+    "scripts/generate-flow.mjs": "c8e72f199a1b2c226deb2f4fbafbdf459119a67e700273b1b15107284def8cd1",
+    "reference/flow_oracle.py": "96b64895211cc7dda8691e96a3e12ceb844947e981e9f1dce3bf0949fac3e060"
+  },
+  "rankFrozen": 2,
+  "oracle": {
+    "passed": true,
+    "numpyVersion": "2.5.1",
+    "elapsedMs": 289.97090039774776,
+    "errors": {
+      "iqRelativeL2": 2.7243134527480934e-8,
+      "filteredRelativeL2": 8.193555648403306e-8,
+      "powerRelativeL2": 1.0005728638657508e-8,
+      "singularValueRelativeL2": 1.811554649604258e-10,
+      "velocityMaxAbsErrorMpsOnAcceptedPixels": 2.2213969847612036e-9,
+      "validMaskDisagreements": 0
+    },
+    "scope": "Independent analytic RF conversion, geometry-derived DAS, full complex SVD, retained power, lag-one velocity and validity masks. Does not independently validate the acoustic forward model or NCC."
+  },
+  "cases": [
+    {
+      "name": "fixed-network-main",
+      "config": {
+        "seed": 1729,
+        "size": 97,
+        "frames": 32,
+        "frameIntervalS": 0.002,
+        "frequencyHz": 1000000,
+        "soundSpeedMps": 1560,
+        "samplingRateHz": 8000000,
+        "samples": 1024,
+        "elementCount": 32,
+        "elementPitchM": 0.00075,
+        "elementRadiusM": 0.0003,
+        "probeZM": 0.1,
+        "centerZM": 0.04,
+        "extentM": 0.04,
+        "tissueDisplacementM": 0.00043,
+        "bloodSpeedMps": 0.04,
+        "noiseRmsRelative": 0.002,
+        "clutterRank": 2
+      },
+      "metrics": {
+        "tissueRejectionDb": 33.64464255811821,
+        "bloodRetentionDb": -0.3749974340392695,
+        "vesselBackgroundBeforeDb": -4.7930132571665425,
+        "vesselBackgroundAfterDb": 10.880805533094586,
+        "tubeMedianVelocityMps": [
+          0.036567520539895475,
+          -0.03583989052108232
+        ],
+        "tubeTruthVelocityMps": [
+          0.04,
+          -0.04
+        ],
+        "tubeCoverage": 0.3082191780821918,
+        "tubeSignAccuracy": 1,
+        "tubeVelocityMaeMps": 0.005155403522831831,
+        "motionMedianM": 0.00043039660843795024,
+        "motionMedianAbsoluteErrorM": 0.000012716516836630857,
+        "motionCoverage": 1,
+        "motionEvaluated": 96,
+        "noiseOnlyValidFraction": 0,
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
+        "gramResidual": 9.872207905837766e-14,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+      },
+      "timingsMs": {
+        "rf": 2008.9682,
+        "delayPlan": 8.269999999999982,
+        "beamform": 51.43139999999994,
+        "svd": 23.117699999999786,
+        "doppler": 5.920100000000275,
+        "motion": 5.063900000000103,
+        "componentValidation": 163.15290000000005
+      }
+    },
+    {
+      "name": "held-out-seed-and-translation",
+      "config": {
+        "seed": 2027,
+        "size": 97,
+        "frames": 32,
+        "frameIntervalS": 0.002,
+        "frequencyHz": 1000000,
+        "soundSpeedMps": 1560,
+        "samplingRateHz": 8000000,
+        "samples": 1024,
+        "elementCount": 32,
+        "elementPitchM": 0.00075,
+        "elementRadiusM": 0.0003,
+        "probeZM": 0.1,
+        "centerZM": 0.04,
+        "extentM": 0.04,
+        "tissueDisplacementM": 0.00037,
+        "bloodSpeedMps": 0.04,
+        "noiseRmsRelative": 0.002,
+        "clutterRank": 2
+      },
+      "metrics": {
+        "tissueRejectionDb": 37.0365395015682,
+        "bloodRetentionDb": -0.3747719185361431,
+        "vesselBackgroundBeforeDb": -3.369755819935571,
+        "vesselBackgroundAfterDb": 12.282090938870969,
+        "tubeMedianVelocityMps": [
+          0.038133338158673744,
+          -0.035396349597245344
+        ],
+        "tubeTruthVelocityMps": [
+          0.04,
+          -0.04
+        ],
+        "tubeCoverage": 0.5114155251141552,
+        "tubeSignAccuracy": 1,
+        "tubeVelocityMaeMps": 0.0035850184578979614,
+        "motionMedianM": 0.0003699081321607681,
+        "motionMedianAbsoluteErrorM": 0.000013037367523893782,
+        "motionCoverage": 1,
+        "motionEvaluated": 96,
+        "noiseOnlyValidFraction": 0,
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
+        "gramResidual": 9.712287042965281e-14,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+      },
+      "timingsMs": {
+        "rf": 2280.2437999999997,
+        "delayPlan": 11.391000000000531,
+        "beamform": 61.156599999999344,
+        "svd": 21.250500000000102,
+        "doppler": 6.636300000000119,
+        "motion": 7.990499999999884,
+        "componentValidation": 192.85789999999997
+      }
+    },
+    {
+      "name": "held-out-noise-and-negative-shift",
+      "config": {
+        "seed": 811,
+        "size": 97,
+        "frames": 32,
+        "frameIntervalS": 0.002,
+        "frequencyHz": 1000000,
+        "soundSpeedMps": 1560,
+        "samplingRateHz": 8000000,
+        "samples": 1024,
+        "elementCount": 32,
+        "elementPitchM": 0.00075,
+        "elementRadiusM": 0.0003,
+        "probeZM": 0.1,
+        "centerZM": 0.04,
+        "extentM": 0.04,
+        "tissueDisplacementM": -0.00029,
+        "bloodSpeedMps": 0.04,
+        "noiseRmsRelative": 0.01,
+        "clutterRank": 2
+      },
+      "metrics": {
+        "tissueRejectionDb": 36.45552976863881,
+        "bloodRetentionDb": -0.22643345255326647,
+        "vesselBackgroundBeforeDb": -3.845788817858966,
+        "vesselBackgroundAfterDb": 8.196853989528222,
+        "tubeMedianVelocityMps": [
+          0.038351698873019396,
+          -0.0360565692296713
+        ],
+        "tubeTruthVelocityMps": [
+          0.04,
+          -0.04
+        ],
+        "tubeCoverage": 0.4920091324200913,
+        "tubeSignAccuracy": 1,
+        "tubeVelocityMaeMps": 0.0034426154066338386,
+        "motionMedianM": -0.0002947394914866553,
+        "motionMedianAbsoluteErrorM": 0.00001767822556566741,
+        "motionCoverage": 1,
+        "motionEvaluated": 96,
+        "noiseOnlyValidFraction": 0,
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
+        "gramResidual": 9.971161196527748e-14,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+      },
+      "timingsMs": {
+        "rf": 2171.4128,
+        "delayPlan": 9.767399999999725,
+        "beamform": 50.24579999999969,
+        "svd": 268.3294999999998,
+        "doppler": 7.107399999998961,
+        "motion": 6.776400000000649,
+        "componentValidation": 160.5030999999999
+      }
+    },
+    {
+      "name": "slow-flow-failure-probe",
+      "config": {
+        "seed": 2027,
+        "size": 97,
+        "frames": 32,
+        "frameIntervalS": 0.002,
+        "frequencyHz": 1000000,
+        "soundSpeedMps": 1560,
+        "samplingRateHz": 8000000,
+        "samples": 1024,
+        "elementCount": 32,
+        "elementPitchM": 0.00075,
+        "elementRadiusM": 0.0003,
+        "probeZM": 0.1,
+        "centerZM": 0.04,
+        "extentM": 0.04,
+        "tissueDisplacementM": 0.00043,
+        "bloodSpeedMps": 0.002,
+        "noiseRmsRelative": 0.002,
+        "clutterRank": 2
+      },
+      "metrics": {
+        "tissueRejectionDb": 33.76226360302114,
+        "bloodRetentionDb": -11.384246068488206,
+        "vesselBackgroundBeforeDb": -3.4846206709358367,
+        "vesselBackgroundAfterDb": 6.532443745759262,
+        "tubeMedianVelocityMps": [
+          0.005521479450964824,
+          -0.0013917265578510065
+        ],
+        "tubeTruthVelocityMps": [
+          0.002,
+          -0.002
+        ],
+        "tubeCoverage": 0.0867579908675799,
+        "tubeSignAccuracy": 0.9736842105263158,
+        "tubeVelocityMaeMps": 0.0011409566938397509,
+        "motionMedianM": 0.0004357812205005308,
+        "motionMedianAbsoluteErrorM": 0.000014410566452559249,
+        "motionCoverage": 1,
+        "motionEvaluated": 96,
+        "noiseOnlyValidFraction": 0,
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
+        "gramResidual": 1.8180479938035926e-13,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+      },
+      "timingsMs": {
+        "rf": 2126.5465999999997,
+        "delayPlan": 10.561799999999494,
+        "beamform": 50.89819999999963,
+        "svd": 18.09939999999915,
+        "doppler": 5.544400000000678,
+        "motion": 5.353300000000672,
+        "componentValidation": 172.40070000000014
+      }
+    }
+  ],
+  "limits": "Fixed model/geometry; three extra cases are sensitivity checks, not population accuracy. Slow-flow case is intentionally retained even if blood suppression or coverage degrades. Motion masks are computed from images; truth masks only define evaluation.",
+  "archives": [
+    {
+      "name": "flow_rf.f32.gz",
+      "bytes": 3987718,
+      "sha256": "9dd9ceb155b7afd6e5348177fcb0c4d596c908fbd1c6c42cf6b21245ed85f256"
+    },
+    {
+      "name": "flow_iq.f32.gz",
+      "bytes": 2240775,
+      "sha256": "3ff7f8419649a73d11bd2ca594e18f12c7b5987d7356daa6f0803160be24b1f3"
+    },
+    {
+      "name": "flow_filtered.f32.gz",
+      "bytes": 2248466,
+      "sha256": "a391ec2aba43959d83b2aefa74d1dac3baccc18271cdaa442ef81bb1b72c8e85"
+    }
+  ]
+}

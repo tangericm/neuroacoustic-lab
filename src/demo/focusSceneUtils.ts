@@ -2,6 +2,11 @@ import * as THREE from 'three';
 import type { Vec3 } from '../core/types';
 import type { FocusDemoFixture } from './types';
 
+/** Fourier amplitude of exp(-u²/(2σ²)): full width between the two half-amplitude frequencies. */
+export function gaussianAmplitudeBandwidthHz(sigmaS: number): number {
+  return Math.sqrt(2 * Math.log(2)) / (Math.PI * sigmaS);
+}
+
 /** One finite pass. Paused/hidden ticks cannot advance its physical sample. */
 export class FocusTimeline {
   elapsedMs = 0;
@@ -68,10 +73,10 @@ export function paintFocusFrame(texture: THREE.DataTexture, frames: Int16Array, 
     const amplitude = Math.min(1, Math.abs(frames[offset + i]) / 32767);
     const contrast = Math.pow(amplitude, .4);
     const pixel = i * 4;
-    pixels[pixel] = Math.round(45 + 210 * contrast);
-    pixels[pixel + 1] = Math.round(184 + 71 * contrast);
-    pixels[pixel + 2] = Math.round(228 + 27 * contrast);
-    pixels[pixel + 3] = amplitude < .004 ? 0 : Math.round(255 * contrast);
+    pixels[pixel] = Math.round(50 + 205 * contrast);
+    pixels[pixel + 1] = Math.round(210 + 45 * contrast);
+    pixels[pixel + 2] = 255;
+    pixels[pixel + 3] = amplitude < .004 ? 0 : Math.round(255 * Math.pow(amplitude, .3));
   }
   texture.needsUpdate = true;
 }

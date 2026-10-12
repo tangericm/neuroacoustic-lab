@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:demo": "node scripts/generate-demo.mjs"
+    "generate:demo": "node scripts/generate-demo.mjs",
+    "generate:flow": "node scripts/generate-flow.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

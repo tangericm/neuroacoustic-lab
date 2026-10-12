@@ -16,17 +16,43 @@
 .focus-legend > span { display: inline-flex; gap: 7px; align-items: center; }
 .focus-legend i { display: inline-block; width: 13px; height: 8px; border-radius: 2px; }
 .focus-wave-key { background: linear-gradient(90deg, #52cee7, white); }
-.focus-anatomy-key { background: #bfb298; }
+.focus-anatomy-key { background: #627680; }
 .focus-boundary-key { border: 1px solid #d6c3a1; }
 .focus-methods { border-top: 1px solid #35464d; padding-top: 14px; color: var(--demo-muted, #aeb9bd); font-size: 13px; line-height: 1.7; }
-.focus-methods summary { width: fit-content; cursor: pointer; color: #d6e4e7; font-size: 14px; }
+.focus-methods summary { width: fit-content; min-height: 44px; align-content: center; cursor: pointer; color: #d6e4e7; font-size: 14px; }
 .focus-methods p { max-width: 850px; }
 .focus-methods a { color: var(--demo-cyan, #8deaf0); }
 .focus-unavailable { height: 100%; padding: 32px; display: grid; place-content: center; line-height: 1.7; }
+.focus-model { padding: 28px 0 24px; margin-top: 24px; border-top: 1px solid #35464d; }
+.focus-model h3 { font-size: 20px; font-weight: 600; line-height: 1.3; margin: 0 0 12px; color: #f1f5f6; }
+.focus-model p { margin: 0 0 16px; max-width: 75ch; color: #bac9ce; font-size: 14px; line-height: 1.7; }
+.focus-equation { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 7px; row-gap: 8px; margin: 22px 0 14px; color: #e5f8fc; font-family: Georgia, "Times New Roman", serif; font-size: 22px; line-height: 1.6; }
+.focus-equation > span { white-space: nowrap; }
+.focus-equation sub, .focus-equation-support sub { font-size: .7em; }
+.focus-equation-support { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 30px; row-gap: 10px; margin-bottom: 24px; color: #c4dce3; font-family: Georgia, "Times New Roman", serif; font-size: 18px; line-height: 1.6; }
+.focus-equation-support > span { max-width: 100%; }
+.focus-model-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; max-width: 1050px; }
+.focus-variables { margin: 0; font-size: 14px; line-height: 1.6; }
+.focus-variables > div { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 12px; margin-bottom: 12px; }
+.focus-variables dt { color: #e5f8fc; }
+.focus-variables dd { margin: 0; color: #bac9ce; }
+.focus-configured-model strong { color: #e5f1f4; font-weight: 600; }
+.focus-model-speeds { margin-top: 20px; }
+.focus-model-speeds h4 { margin: 0 0 10px; color: #d9e7eb; font-size: 14px; font-weight: 600; }
+.focus-model-speeds ul { display: flex; flex-wrap: wrap; gap: 14px 30px; margin: 0; padding: 0; list-style: none; }
+.focus-model-speeds li { display: flex; gap: 8px; align-items: baseline; font-size: 13px; color: #bac9ce; }
+.focus-model-speeds strong { color: #e5f1f4; font-weight: 500; font-variant-numeric: tabular-nums; }
+.focus-model ::selection { background: #8deaf0; color: #102126; }
 @media (max-width: 620px) {
   .focus-scene { height: 420px; border-radius: 12px; }
   .focus-hud { flex-direction: column; align-items: flex-start; right: 12px; left: 12px; top: 12px; gap: 6px; }
   .focus-scene-bottom { bottom: 12px; right: 12px; left: 12px; flex-direction: column; align-items: flex-start; gap: 5px; }
   .focus-scene-bottom > span { font-size: 11px; }
   .focus-caption { flex-basis: 100%; margin-left: 0; }
+  .focus-model { margin-top: 20px; padding-top: 24px; }
+  .focus-equation { font-size: 20px; row-gap: 6px; }
+  .focus-equation-support { flex-direction: column; align-items: flex-start; font-size: 17px; gap: 12px; }
+  .focus-model-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .focus-variables > div { grid-template-columns: 70px minmax(0, 1fr); gap: 10px; }
+  .focus-model-speeds ul { gap: 12px 22px; }
 }

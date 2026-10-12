@@ -40,3 +40,13 @@ Published on October 12, 2026:
 - Vercel project creation, CLI production deployment, and alias succeeded. The GitHub integration connection failed twice; automatic push deployment is not claimed. GitHub CI remains connected. Future publication uses the linked Vercel CLI until that integration is enabled.
 
 Domain follow-up on October 12: the user connected the GitHub repository. The project API confirms `tangericm/ultrasound-lab`, production branch `main`. The unsuffixed `ultrasound-lab.vercel.app` address was already in use. Added verified production domain `neuroacoustic-lab.vercel.app` to the existing project and configured the initial `ultrasound-lab-six.vercel.app` address to redirect with HTTP 308. Updated the README and GitHub homepage to the new domain. This changes publication metadata and routing; the numerical implementation is unchanged.
+
+## Fixed visual demo revision
+
+The user approved a simpler recruiter experience: one fixed focusing plane/target and a separate imaging experiment, with engineering controls retained in an optional advanced view. Parallel scientific, scene, interface, and independent review work produced the revision. Default views load frozen data and do not create a numerical worker. Existing `#s=` scenario URLs and `?view=lab` still select the original simulator.
+
+A sampling audit rejected the initial 96-square signed-carrier movie. The final 176-square movie shows the coherent complex pulse sum's envelope at 0.5-microsecond intervals with fixed normalization. The source and asset hashes, saturation counts, and spatial/temporal display comparisons are published. A 1-microsecond candidate exceeded the specified local interpolation-error gate and was rejected. This is a ray-model display check; the older compact k-Wave fixtures do not validate this head movie.
+
+Before publication: 82 JavaScript tests, 17 Python reference tests, TypeScript, production build, and independent implementation review passed. Browser checks covered desktop and 370-pixel phone layouts, actual echo alignment and staged reconstruction, finite playback/pause/replay, readable target overlay, responsive framing, advanced navigation, and empty error/warning logs. Reduced-motion and renderer-failure behavior were tested through component contracts. Detailed evidence and measurement boundaries are in `RECRUITER_DEMO_QA.md`.
+
+Vercel Web Analytics remains mounted with query/hash stripping. The project API reports analytics enabled and the GitHub connection's production branch as `main`.

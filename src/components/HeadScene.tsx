@@ -35,7 +35,7 @@ export function fieldPixels(field: FieldPlane, normalization: number, phase?: nu
   return pixels;
 }
 
-function Brain({ scenario, clips, onTarget, onReady }: { scenario: Scenario; clips: THREE.Plane[]; onTarget: (point: Vec3) => void; onReady: () => void }) {
+export function Brain({ scenario, clips, onTarget, onReady, color = '#a3a6b1' }: { scenario: Scenario; clips: THREE.Plane[]; onTarget?: (point: Vec3) => void; onReady: () => void; color?: string }) {
   const gltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/brain.glb`, loader => { const draco = new DRACOLoader(); draco.setDecoderPath(`${import.meta.env.BASE_URL}draco/`); loader.setDRACOLoader(draco); });
   const manifestRaw = useLoader(THREE.FileLoader, `${import.meta.env.BASE_URL}models/manifest.json`);
   const categories = useMemo(() => {
@@ -66,14 +66,14 @@ function Brain({ scenario, clips, onTarget, onReady }: { scenario: Scenario; cli
   }, [gltf, categories]);
   useOwnedResource(mergedGeometry);
   const brain = useMemo(() => {
-    const copy = new THREE.Mesh(mergedGeometry, new THREE.MeshStandardMaterial({ color: '#a3a6b1', roughness: .8, metalness: .04, side: THREE.DoubleSide, clippingPlanes: clips }));
+    const copy = new THREE.Mesh(mergedGeometry, new THREE.MeshStandardMaterial({ color, roughness: .8, metalness: .04, side: THREE.DoubleSide, clippingPlanes: clips }));
     const inner = scenario.medium.outerRadiiM.map(r => r - scenario.medium.scalpThicknessM - scenario.medium.skullThicknessM - scenario.medium.fluidThicknessM);
     const scale = fitScale(mergedGeometry.getAttribute('position').array, inner);
     const container = new THREE.Group(); container.add(copy); container.scale.setScalar(scale);
     return container;
-  }, [mergedGeometry, clips, scenario.medium]);
+  }, [mergedGeometry, clips, scenario.medium, color]);
   useEffect(() => () => brain.traverse(o => { if (o instanceof THREE.Mesh && o.material instanceof THREE.Material) o.material.dispose(); }), [brain]);
-  return <><primitive object={brain} onClick={(e: { point: THREE.Vector3; stopPropagation: () => void }) => { e.stopPropagation(); onTarget(e.point.toArray() as Vec3); }} /><AnatomyReady onReady={onReady} /></>;
+  return <><primitive object={brain} onClick={onTarget ? (e: { point: THREE.Vector3; stopPropagation: () => void }) => { e.stopPropagation(); onTarget(e.point.toArray() as Vec3); } : undefined} /><AnatomyReady onReady={onReady} /></>;
 }
 function ElementDisk({ element, selected, onSelect }: { element: Scenario['array']['elements'][number]; selected: boolean; onSelect: () => void }) {
   const quaternion = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(...element.normal).normalize()), [element.normal]);

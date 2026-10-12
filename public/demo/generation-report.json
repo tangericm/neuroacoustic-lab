@@ -1,0 +1,35 @@
+{
+  "generatedUtc": "2026-10-12T19:09:54.344Z",
+  "focusMs": 1085.4955,
+  "imagingMs": 245.23490000000015,
+  "saturatedSamples": 14,
+  "frameDecodedBytes": 14930432,
+  "rfDecodedBytes": 524288,
+  "assets": [
+    {
+      "name": "focus-pressure.i16.gz",
+      "bytes": 3831524,
+      "sha256": "b724cdbcb92846871aed1945ab4c6f414e0407f4b43efc8b0782a757cbba31b1"
+    },
+    {
+      "name": "imaging-rf.f32.gz",
+      "bytes": 489646,
+      "sha256": "cb660f31d649ad278769e8d88789f3fa4798ead92c91b453db20565a4d0479f3"
+    },
+    {
+      "name": "focus.json",
+      "bytes": 21464,
+      "sha256": "cb89fc008975419ed70a9120efca65e6ab8749357adecf507409d30c3adb9315"
+    },
+    {
+      "name": "imaging.json",
+      "bytes": 1988534,
+      "sha256": "b24e6a288b64212819f4153315b75dd925563c0ecf864a8d69ab0ff1ae5b463c"
+    },
+    {
+      "name": "display-sampling-report.json",
+      "bytes": 6076,
+      "sha256": "ad1bcfd836f07028ca0b9ac0e6ee37940b2fadc97081853d0a955cc56692cf3f"
+    }
+  ]
+}

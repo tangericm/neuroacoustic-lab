@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "scope": "Display sampling sensitivity only; 384-square scalar-ray reference is finite-resolution and is not full-wave validation or a convergence claim.",
+  "configuration": {
+    "frequencyHz": 500000,
+    "targetM": [
+      0.015,
+      0,
+      0.015
+    ],
+    "planeExtentM": 0.26,
+    "pressureScale": 2.444735227825497,
+    "selectedSize": 176,
+    "selectedPitchMm": 1.4857142857142858,
+    "selectedStepUs": 0.5
+  },
+  "metrics": {
+    "spatial": "Bilinear interpolation of each lower-resolution snapshot onto the 384-square grid. Relative L2 = sqrt(sum(error^2)/sum(reference^2)). Mask: inside acoustic brain and reference coherent envelope >= 0.02 times pressureScale. No clipping or display gamma.",
+    "temporal": "Linear midpoint interpolation compared with directly evaluated coherent envelope at the same 176-square pixels. Mask: within 12 mm of target and exact envelope >= 0.1 times pressureScale. maxRelative = maximum absolute error divided by exact pixel envelope; relative L2 uses the same mask.",
+    "choice": "Retain 0.5 microsecond frames because 1 microsecond midpoint interpolation exceeds the 10% maximum local relative-error gate. Envelope is magnitude after complex summation, so interference remains; finer unresolved fringes may persist."
+  },
+  "spatial": [
+    {
+      "size": 96,
+      "timeUs": 60,
+      "quantity": "real",
+      "relativeL2": 1.0670887951683086,
+      "pixels": 4009
+    },
+    {
+      "size": 96,
+      "timeUs": 60,
+      "quantity": "envelope",
+      "relativeL2": 0.2216628869307749,
+      "pixels": 4009
+    },
+    {
+      "size": 96,
+      "timeUs": 70,
+      "quantity": "real",
+      "relativeL2": 1.0252223796598356,
+      "pixels": 4541
+    },
+    {
+      "size": 96,
+      "timeUs": 70,
+      "quantity": "envelope",
+      "relativeL2": 0.16375875018642366,
+      "pixels": 4541
+    },
+    {
+      "size": 96,
+      "timeUs": 76.98595814192193,
+      "quantity": "real",
+      "relativeL2": 0.9693874955276596,
+      "pixels": 3924
+    },
+    {
+      "size": 96,
+      "timeUs": 76.98595814192193,
+      "quantity": "envelope",
+      "relativeL2": 0.2636468685589211,
+      "pixels": 3924
+    },
+    {
+      "size": 96,
+      "timeUs": 85,
+      "quantity": "real",
+      "relativeL2": 1.0601505178909099,
+      "pixels": 3507
+    },
+    {
+      "size": 96,
+      "timeUs": 85,
+      "quantity": "envelope",
+      "relativeL2": 0.15033991937945676,
+      "pixels": 3507
+    },
+    {
+      "size": 176,
+      "timeUs": 60,
+      "quantity": "real",
+      "relativeL2": 0.5761621620432703,
+      "pixels": 4009
+    },
+    {
+      "size": 176,
+      "timeUs": 60,
+      "quantity": "envelope",
+      "relativeL2": 0.1008578167575336,
+      "pixels": 4009
+    },
+    {
+      "size": 176,
+      "timeUs": 70,
+      "quantity": "real",
+      "relativeL2": 0.5221048813561111,
+      "pixels": 4541
+    },
+    {
+      "size": 176,
+      "timeUs": 70,
+      "quantity": "envelope",
+      "relativeL2": 0.0669883442289809,
+      "pixels": 4541
+    },
+    {
+      "size": 176,
+      "timeUs": 76.98595814192193,
+      "quantity": "real",
+      "relativeL2": 0.5531387947661643,
+      "pixels": 3924
+    },
+    {
+      "size": 176,
+      "timeUs": 76.98595814192193,
+      "quantity": "envelope",
+      "relativeL2": 0.18862629590773988,
+      "pixels": 3924
+    },
+    {
+      "size": 176,
+      "timeUs": 85,
+      "quantity": "real",
+      "relativeL2": 0.5323381346247636,
+      "pixels": 3507
+    },
+    {
+      "size": 176,
+      "timeUs": 85,
+      "quantity": "envelope",
+      "relativeL2": 0.05169644544675899,
+      "pixels": 3507
+    },
+    {
+      "size": 192,
+      "timeUs": 60,
+      "quantity": "real",
+      "relativeL2": 0.5103211644601471,
+      "pixels": 4009
+    },
+    {
+      "size": 192,
+      "timeUs": 60,
+      "quantity": "envelope",
+      "relativeL2": 0.08858881028438716,
+      "pixels": 4009
+    },
+    {
+      "size": 192,
+      "timeUs": 70,
+      "quantity": "real",
+      "relativeL2": 0.4772651640952458,
+      "pixels": 4541
+    },
+    {
+      "size": 192,
+      "timeUs": 70,
+      "quantity": "envelope",
+      "relativeL2": 0.05834900551459379,
+      "pixels": 4541
+    },
+    {
+      "size": 192,
+      "timeUs": 76.98595814192193,
+      "quantity": "real",
+      "relativeL2": 0.4749797631572444,
+      "pixels": 3924
+    },
+    {
+      "size": 192,
+      "timeUs": 76.98595814192193,
+      "quantity": "envelope",
+      "relativeL2": 0.1463485006198654,
+      "pixels": 3924
+    },
+    {
+      "size": 192,
+      "timeUs": 85,
+      "quantity": "real",
+      "relativeL2": 0.4862915045639745,
+      "pixels": 3507
+    },
+    {
+      "size": 192,
+      "timeUs": 85,
+      "quantity": "envelope",
+      "relativeL2": 0.04713505201338753,
+      "pixels": 3507
+    }
+  ],
+  "temporal": [
+    {
+      "stepUs": 1,
+      "timeUs": 75.5,
+      "maxRelative": 0.15328392578726138,
+      "relativeL2": 0.04858877869429044,
+      "pixels": 19
+    },
+    {
+      "stepUs": 1,
+      "timeUs": 76.5,
+      "maxRelative": 0.0902378043858185,
+      "relativeL2": 0.04811597451838784,
+      "pixels": 15
+    },
+    {
+      "stepUs": 1,
+      "timeUs": 77.5,
+      "maxRelative": 0.0960714286998137,
+      "relativeL2": 0.047920682711439434,
+      "pixels": 17
+    },
+    {
+      "stepUs": 1,
+      "timeUs": 78.5,
+      "maxRelative": 0.1380014326858598,
+      "relativeL2": 0.049382540755831796,
+      "pixels": 19
+    },
+    {
+      "stepUs": 0.5,
+      "timeUs": 75.25,
+      "maxRelative": 0.022568215156707212,
+      "relativeL2": 0.012233860121690374,
+      "pixels": 19
+    },
+    {
+      "stepUs": 0.5,
+      "timeUs": 76.25,
+      "maxRelative": 0.027541053220726922,
+      "relativeL2": 0.01219045882316069,
+      "pixels": 17
+    },
+    {
+      "stepUs": 0.5,
+      "timeUs": 77.25,
+      "maxRelative": 0.02166540692944854,
+      "relativeL2": 0.012278729880062315,
+      "pixels": 14
+    },
+    {
+      "stepUs": 0.5,
+      "timeUs": 78.25,
+      "maxRelative": 0.02632316361155283,
+      "relativeL2": 0.012306613027731483,
+      "pixels": 20
+    }
+  ]
+}

@@ -9,7 +9,7 @@ export interface DemoProvenance {
 export interface FocusDemoFixture {
   version: 1; kind: 'fixed-focused-pulse'; scenario: Scenario;
   plane: DemoPlane;
-  frames: { url: string; encoding: 'signed-int16-le'; count: number; startS: number; stepS: number; pressureScale: number };
+  frames: { url: string; encoding: 'signed-int16-le'; quantity: 'coherent-pulse-envelope'; count: number; startS: number; stepS: number; pressureScale: number };
   targetArrivalS: number; delaysS: number[]; weights: number[]; driveEnergy: number;
   provenance: DemoProvenance;
 }

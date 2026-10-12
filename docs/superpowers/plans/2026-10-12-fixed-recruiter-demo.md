@@ -36,9 +36,9 @@
 
 ## Progress
 
-- [ ] Fixture generation and scientific checks.
-- [ ] Focus scene and playback checks.
-- [ ] Landing/imaging presentation and interaction checks.
+- [x] Fixture generation and scientific checks. Final focus quantity is the coherent pulse envelope; carrier aliasing and retained display sampling limits are documented.
+- [x] Focus scene and playback checks.
+- [x] Landing/imaging presentation and interaction checks.
 - [ ] Integrated review, production-browser checks, and release.
 
 Ruling: use the clean standalone checkout on a feature branch, with separate file ownership; dependencies and offline reference environment already live here. Cross-file integration is verified by the controller.

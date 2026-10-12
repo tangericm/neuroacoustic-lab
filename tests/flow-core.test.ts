@@ -20,12 +20,12 @@ describe('shared temporal ultrasound processing',()=>{
   });
   it('uses fixed RF shape, independent frame noise and cached channel-derived complex DAS',()=>{
     const cfg={...defaultFlowConfig(),size:33,frames:4};const e=createFlowEnsemble(cfg),plan=buildDasPlan(cfg,e.elements);
-    expect(e.mixed.length).toBe(4*32*1024);expect(e.noiseRms).toBeGreaterThan(0);
-    expect(Array.from(e.noise.slice(0,128))).not.toEqual(Array.from(e.noise.slice(32*1024,32*1024+128)));
+    expect(e.mixed.length).toBe(4*cfg.elementCount*cfg.samples);expect(e.noiseRms).toBeGreaterThan(0);
+    expect(Array.from(e.noise.slice(0,128))).not.toEqual(Array.from(e.noise.slice(cfg.elementCount*cfg.samples,cfg.elementCount*cfg.samples+128)));
     const mixed=applyDasPlan(cfg,e.elements,e.mixed,plan),a=applyDasPlan(cfg,e.elements,e.tissue,plan),b=applyDasPlan(cfg,e.elements,e.blood,plan),n=applyDasPlan(cfg,e.elements,e.noise,plan);
     let max=0,err=0;for(let i=0;i<mixed.real.length;i++){max=Math.max(max,Math.abs(mixed.real[i]));err=Math.max(err,Math.abs(mixed.real[i]-a.real[i]-b.real[i]-n.real[i]));}
     expect(err).toBeLessThan(max*1e-5);
-    expect(plan.indices.length).toBe(33*33*32);
+    expect(plan.indices.length).toBe(33*33*cfg.elementCount);
   });
   it('tracks a noninteger tissue shift and masks ambiguous constant patches',()=>{
     const size=41,first=new Float64Array(size*size),last=new Float64Array(size*size);

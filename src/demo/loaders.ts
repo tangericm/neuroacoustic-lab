@@ -80,6 +80,7 @@ export function loadFlowDemo(): Promise<FlowFixture> {
       !Number.isInteger(c.samples) || c.samples < 32 || c.samples > 8192 || !Number.isFinite(c.seed) ||
       [c.frequencyHz, c.soundSpeedMps, c.samplingRateHz, c.frameIntervalS, c.elementPitchM, c.elementRadiusM, c.extentM].some(v => !Number.isFinite(v) || v <= 0) ||
       [c.tissueDisplacementM, c.bloodSpeedMps, c.noiseRmsRelative, c.probeZM, c.centerZM].some(v => !Number.isFinite(v)) ||
+      [c.attenuationDbCmAtMHz, c.attenuationPower].some(v => !Number.isFinite(v) || v < 0) ||
       !Number.isInteger(c.clutterRank) || c.clutterRank < 0 || c.clutterRank >= c.frames ||
       !Array.isArray(shape) || shape.length !== 4 || shape[0] !== c.frames || shape[1] !== 1 || shape[2] !== c.elementCount || shape[3] !== c.samples ||
       !finiteArray(fixture.acquisition.frameTimesS, c.frames) || !Number.isFinite(fixture.acquisition.timeOriginS) || !Number.isFinite(fixture.acquisition.noiseRms)) invalid();

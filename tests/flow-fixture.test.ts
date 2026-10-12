@@ -14,11 +14,16 @@ describe('frozen flow scientific provenance',()=>{
     expect(validation.rankFrozen).toBe(2);
     expect(validation.cases.map((v:{config:{clutterRank:number}})=>v.config.clutterRank)).toEqual([2,2,2,2]);
     const main=validation.cases[0].metrics,slow=validation.cases[3].metrics;
-    expect(main.tubeCoverage).toBeGreaterThan(.2);expect(main.tubeCoverage).toBeLessThan(.9);
+    expect(main.tubeCoverage).toBeGreaterThan(.8);expect(main.tubeCoverage).toBeLessThan(1);
+    expect(main.tubePowerFwhmM.every((width:number)=>width<.005)).toBe(true);
+    expect(main.branchPowerContrastDb).toHaveLength(7);
+    expect(main.branchPowerContrastDb.every((b:{contrastDb:number})=>b.contrastDb>3)).toBe(true);
     expect(main.tubeSignAccuracy).toBeGreaterThan(.9);
     expect(main.motionMedianAbsoluteErrorM).toBeLessThan(.0001);
-    expect(slow.bloodRetentionDb).toBeLessThan(-6);
-    expect(slow.tubeCoverage).toBeLessThan(main.tubeCoverage);
+    // This acquisition preserves more slow flow than the old 32-frame fixture.
+    // Keep its measured loss explicit: fewer than half the blood energy/pixels survive.
+    expect(10 ** (slow.bloodRetentionDb / 10)).toBeLessThan(.5);
+    expect(slow.tubeCoverage).toBeLessThan(main.tubeCoverage / 2);
   });
   it('ships measured maps and shared-scale cine without invalid-data substitutions',()=>{
     const pixels=fixture.plane.size**2;

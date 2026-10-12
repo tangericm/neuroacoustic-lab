@@ -1,7 +1,7 @@
 /** Independent homogeneous imaging probe; does not inherit focused-head-array constraints. */
 export interface FlowConfig {
   seed:number; size:number; frames:number; frameIntervalS:number; frequencyHz:number;
-  soundSpeedMps:number; samplingRateHz:number; samples:number; elementCount:number;
+  soundSpeedMps:number; attenuationDbCmAtMHz:number; attenuationPower:number; samplingRateHz:number; samples:number; elementCount:number;
   elementPitchM:number; elementRadiusM:number; probeZM:number; centerZM:number; extentM:number;
   tissueDisplacementM:number; bloodSpeedMps:number; noiseRmsRelative:number; clutterRank:number;
 }

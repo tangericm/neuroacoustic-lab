@@ -13,13 +13,14 @@ const server=await createServer({root,server:{middlewareMode:true,watch:null},op
 try{
   const {generateFlowCase,flowFixture}=await server.ssrLoadModule('/src/demo/generate-flow-fixture.ts');
   const result=generateFlowCase();
-  const provenance={modelVersion:'homogeneous-temporal-scatterers-v1',generatedUtc:new Date().toISOString(),sourceHashes,referenceUrl:'/demo/flow-validation.json',assumptions:[
+  const provenance={modelVersion:'homogeneous-temporal-scatterers-v2',generatedUtc:new Date().toISOString(),sourceHashes,referenceUrl:'/demo/flow-validation.json',assumptions:[
     'Original procedural phantom; prescribed trajectories, not anatomy or fluid dynamics. Network branches are independent scatterer streams with wrapping; no conservation or vessel-wall mechanics claim.',
-    '97-square image over 40 mm, 32 frames separated by 2 ms, 32 linear 0.6 mm-diameter pistons at 0.75 mm pitch, one central individual transmitter; no transmit compounding.',
-    'Homogeneous scalar straight paths at 1560 m/s. The Gaussian carrier has f₀=1 MHz and σ=0.7/f₀=0.7 µs, giving amplitude-spectrum FWHM ≈536 kHz. Piston directivity and brain-like attenuation use a center-frequency approximation. No refraction, multiple scattering or full-wave solver.',
-    'Scatterers are stationary during each echo acquisition. Tissue shifts by 0.43 mm over 62 ms; blood travels at prescribed centerline speeds, with ±40 mm/s in calibration tubes.',
-    'Tissue and blood amplitudes are seeded, blood amplitudes are one tenth as large. Gaussian receiver noise has independent per-frame seeds and fixed RMS 0.002 times the maximum noiseless channel amplitude across the ensemble.',
-    'Fast-time sampling is 8 MHz with a fixed origin and 1024 samples. Complex phase is preserved across frames; physical slow time differs from browser playback time.',
+    '97-square image over 40 mm, 64 frames separated by 2 ms, 64 linear 0.3 mm-diameter pistons at 0.35 mm pitch, probe z=85 mm, one central individual transmitter; no transmit compounding.',
+    'Homogeneous scalar straight paths at 1560 m/s. The Gaussian carrier has f₀=2 MHz and σ=0.7/f₀=0.35 µs, giving amplitude-spectrum FWHM ≈1071 kHz. Piston directivity and chosen phantom attenuation (0.5 dB/cm/MHz, not a measured tissue property) use a center-frequency approximation. No refraction, multiple scattering or full-wave solver.',
+    'DAS applies the same depth gain to every frame: g(z)=(d/d_ref)^2*10^[2*(d-d_ref)*100*alpha(f)/20], d=probeZ-z, d_ref=probeZ-centerZ. This nominal two-way spreading/attenuation correction uses no vessel geometry and also amplifies deep noise.',
+    'Scatterers are stationary during each echo acquisition. Tissue shifts by 0.43 mm over 126 ms; blood travels at prescribed centerline speeds, with ±40 mm/s in calibration tubes.',
+    'Tissue and blood amplitudes are seeded, blood amplitudes are one tenth as large; each stream has ceil(length in meters * 10000) scatterers. Gaussian receiver noise has independent per-frame seeds and fixed RMS 0.002 times the maximum noiseless channel amplitude across the ensemble.',
+    'Fast-time sampling is 16 MHz with a fixed origin and 2048 samples. Complex phase is preserved across frames; physical slow time differs from browser playback time.',
     'Rank two was chosen in the disclosed earlier exploratory tube probe and frozen before the held-out seed/noise/translation cases saved in the validation report.',
     'Tissue/blood oracle components and geometry masks are evaluation only; neither supplies the estimated image, SVD projector, velocity validity mask or motion validity mask.',
     'Power comparisons share the unfiltered peak and -40 dB display floor; values below the floor are clipped only for display. B-mode cine uses one ensemble envelope peak and -55 dB floor. No per-frame normalization.',
@@ -29,6 +30,7 @@ try{
     {title:'Demené et al. (2015), spatiotemporal SVD clutter filtering',url:'https://pubmed.ncbi.nlm.nih.gov/25955583/'},
     {title:'Kasai et al. (1988), complex autocorrelation flow imaging',url:'https://onlinelibrary.wiley.com/doi/10.1002/scj.4690191102'},
     {title:'Mirzaei et al., normalized cross-correlation displacement estimation',url:'https://arxiv.org/abs/1804.05305'},
+    {title:'Field II, point-spread function and aperture examples',url:'https://field-ii.dk/examples/psf_example/psf_example.html'},
     {title:'Field II, moving-scatterer flow example',url:'https://www.field-ii.dk/examples/flow_example/flow_example.html'}
   ]};
   const fixture=flowFixture(result,provenance);

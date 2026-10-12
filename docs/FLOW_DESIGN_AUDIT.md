@@ -2,6 +2,8 @@
 
 Audit date: 2026-10-12. Scope: recruiter frame, focused-ultrasound explanation, four imaging steps, actual-source disclosures, fixture loaders, and display mappings. This is a source and supplied-screenshot audit; browser interaction verification belongs to the integration pass.
 
+Follow-up on the same date: the fixed vascular acquisition was refined to show two left-hand tubes and a connected branching tree, with geometry-only depth gain and a longer ensemble. Playback now loops until paused, retaining visibility/reduced-motion safeguards. A separate focused scientific/lifecycle review found no blocking issue; the four-step layout and CSS remain unchanged. New desktop/mobile captures and 104 JavaScript / 18 Python passing tests are recorded in [FLOW_REPRODUCIBILITY.md](FLOW_REPRODUCIBILITY.md). The score and detector result below belong to the initial audit; no new certification or detector pass is implied.
+
 ## Implementation integrity verdict
 
 **Pass.** The interface expresses a coherent scientific instrument: real generated numerical images lead each step, purpose and assumptions remain visible, and expandable code comes from the actual reusable TypeScript functions. The brain focus and vascular imaging experiments are explicitly separate. Prescribed phantom geometry is labeled as truth rather than presented as an estimated image. No invented testimonials, clinical claims, decorative metrics, or fake product screenshots were found in the reviewed surface.

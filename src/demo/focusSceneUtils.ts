@@ -7,14 +7,19 @@ export function gaussianAmplitudeBandwidthHz(sigmaS: number): number {
   return Math.sqrt(2 * Math.log(2)) / (Math.PI * sigmaS);
 }
 
-/** One finite pass. Paused/hidden ticks cannot advance its physical sample. */
+/** Finite by default; looped playback restarts the recorded physical time each cycle. */
 export class FocusTimeline {
   elapsedMs = 0;
   frame = 0;
   done = false;
-  constructor(readonly count: number, readonly durationMs: number, readonly snapshot: number) {}
+  constructor(readonly count: number, readonly durationMs: number, readonly snapshot: number, readonly loop = false) {}
   advance(deltaMs: number, active: boolean): void {
     if (!active || this.done) return;
+    if (this.loop) {
+      this.elapsedMs = (this.elapsedMs + Math.max(0, deltaMs)) % this.durationMs;
+      this.frame = Math.min(this.count - 1, Math.floor(this.elapsedMs / this.durationMs * this.count));
+      return;
+    }
     this.elapsedMs = Math.min(this.durationMs, this.elapsedMs + Math.max(0, deltaMs));
     this.done = this.elapsedMs >= this.durationMs;
     this.frame = this.done ? this.snapshot : Math.min(this.count - 1, Math.floor(this.elapsedMs / this.durationMs * (this.count - 1)));
@@ -22,7 +27,7 @@ export class FocusTimeline {
   reset(): void { this.elapsedMs = 0; this.frame = 0; this.done = false; }
 }
 
-/** Own the demand-frame chain: inactive and completed movies never schedule a successor. */
+/** Own the demand-frame chain: inactive and completed finite movies never schedule a successor. */
 export function tickFocusPlayback(timeline: FocusTimeline, deltaMs: number, active: boolean, sample: (frame: number, captured: boolean) => void, complete: () => void, invalidate: () => void): void {
   if (!active || timeline.done) return;
   const previous = timeline.frame;

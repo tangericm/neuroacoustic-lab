@@ -47,6 +47,11 @@ def check_reference():
         f = fractions[good, r]
         iq[:, good] += analytic[:, r, k[good]]*(1-f) + analytic[:, r, k[good]+1]*f
     iq /= n
+    # Nominal axial two-way spreading/attenuation correction, no phantom mask.
+    depth = c['probeZM'] - pz.reshape(-1)
+    reference_depth = c['probeZM'] - c['centerZM']
+    gain = (depth/reference_depth)**2 * 10**(2*(depth-reference_depth)*100*c['attenuationDbCmAtMHz']*(c['frequencyHz']/1e6)**c['attenuationPower']/20)
+    iq *= gain[None, :]
     x = iq.T
     u, singular, vh = np.linalg.svd(x, full_matrices=False)
     rank = c['clutterRank']

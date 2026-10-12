@@ -17,3 +17,16 @@ it('loads only the browser flow artifact, rejects inconsistent axes/frames, and 
   expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(fetchMock.mock.calls.flat()).toEqual(['/demo/flow.json', '/demo/flow.json']);
 });
+it('rejects missing or negative attenuation parameters and retries valid phantom data', async () => {
+  const fixture = JSON.parse(readFileSync('public/demo/flow.json', 'utf8'));
+  const config = { ...fixture.config, attenuationDbCmAtMHz: .5, attenuationPower: 1 };
+  let data: typeof fixture = { ...fixture, config: { ...config, attenuationDbCmAtMHz: -1 } };
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(data))));
+  const { loadFlowDemo } = await import('../src/demo/loaders');
+  const rejectsInvalid = () => loadFlowDemo().then(() => false, error => error.message.includes('invalid'));
+  expect(await rejectsInvalid()).toBe(true);
+  data = { ...fixture, config: { ...config, attenuationPower: undefined } };
+  expect(await rejectsInvalid()).toBe(true);
+  data = { ...fixture, config };
+  expect((await loadFlowDemo()).config.attenuationDbCmAtMHz).toBe(.5);
+});

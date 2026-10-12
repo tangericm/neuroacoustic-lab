@@ -62,6 +62,35 @@ describe('finite focus playback', () => {
   });
 });
 
+describe('looping focus playback', () => {
+  it('shows the last recorded frame before wrapping physical time to the first frame across two cycles', () => {
+    const timeline = new FocusTimeline(5, 8000, 2, true);
+    const samples: number[] = [];
+    let finished = 0;
+    let requested = 0;
+    const tick = (deltaMs: number, active = true) => tickFocusPlayback(timeline, deltaMs, active, frame => samples.push(frame), () => finished++, () => requested++);
+    tick(6400);
+    expect(timeline.frame).toBe(4);
+    tick(1600);
+    expect(timeline.frame).toBe(0);
+    expect(timeline.elapsedMs).toBe(0);
+    tick(6400);
+    tick(1600);
+    expect(samples).toEqual([4, 0, 4, 0]);
+    expect(finished).toBe(0);
+    expect(requested).toBe(4);
+    expect(timeline.done).toBe(false);
+    tick(90000, false);
+    expect(timeline.elapsedMs).toBe(0);
+    expect(requested).toBe(4);
+    tick(3200);
+    expect(timeline.frame).toBe(2);
+    timeline.reset();
+    expect(timeline.frame).toBe(0);
+    expect(timeline.elapsedMs).toBe(0);
+  });
+});
+
 describe('cached coherent pulse-envelope display', () => {
   it('reuses one texture buffer, preserves a fixed amplitude scale, and leaves zero amplitude transparent', () => {
     const texture = createFocusTexture(2);

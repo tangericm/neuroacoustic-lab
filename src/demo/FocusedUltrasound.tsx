@@ -71,8 +71,8 @@ function ContextLifetime({ onLost }: { onLost: () => void }) {
   return null;
 }
 
-function PulseScene({ fixture, frames, snapshot, command, active, onFinish, onSample, onReady, onAnatomyError, onLost }: {
-  fixture: FocusDemoFixture; frames: Int16Array; snapshot: number; command: Command; active: boolean;
+function PulseScene({ fixture, frames, snapshot, command, active, loop, onFinish, onSample, onReady, onAnatomyError, onLost }: {
+  fixture: FocusDemoFixture; frames: Int16Array; snapshot: number; command: Command; active: boolean; loop: boolean;
   onFinish: () => void; onSample: (frame: number, captured: boolean) => void;
   onReady: () => void; onAnatomyError: () => void; onLost: () => void;
 }) {
@@ -96,7 +96,7 @@ function PulseScene({ fixture, frames, snapshot, command, active, onFinish, onSa
     return resource;
   }, [fixture, frames, snapshot]);
   useOwnedResource(texture);
-  const timeline = useMemo(() => new FocusTimeline(fixture.frames.count, REPLAY_MS, snapshot), [fixture, snapshot]);
+  const timeline = useMemo(() => new FocusTimeline(fixture.frames.count, REPLAY_MS, snapshot, loop), [fixture, snapshot, loop]);
   const skipFirstTick = useRef(true);
   const publishSample = useCallback((frame: number, captured: boolean) => {
     paintFocusFrame(texture, frames, frame, fixture.plane.size);
@@ -209,7 +209,7 @@ export default function FocusedUltrasound({ fixture, frames }: { fixture: FocusD
     <div className="focus-scene" ref={sceneRef} aria-label="3D fixed focused-ultrasound demonstration">
       {unavailable ? <div className="focus-unavailable" role="alert">The 3D view is unavailable on this device. The ultrasound imaging demonstration remains available.</div> : <SceneErrorBoundary onError={onLost}>
         <Canvas frameloop="demand" camera={{ position: [.10, -.33, .14], up: [0, 0, 1], near: .001, far: 3, fov: 36 }} dpr={[1, 1.5]} gl={{ antialias: true, localClippingEnabled: true }}>
-          <PulseScene fixture={fixture} frames={frames} snapshot={snapshot} command={command} active={playing && visible && !unavailable} onFinish={onFinish} onSample={onSample} onReady={onReady} onAnatomyError={onAnatomyError} onLost={onLost} />
+          <PulseScene fixture={fixture} frames={frames} snapshot={snapshot} command={command} active={playing && visible && !unavailable} loop={!reduced} onFinish={onFinish} onSample={onSample} onReady={onReady} onAnatomyError={onAnatomyError} onLost={onLost} />
         </Canvas>
       </SceneErrorBoundary>}
       {!unavailable && <AnatomyStatus state={anatomy} />}
@@ -219,13 +219,13 @@ export default function FocusedUltrasound({ fixture, frames }: { fixture: FocusD
     <div className="focus-controls">
       <button type="button" onClick={toggle} disabled={unavailable} aria-label={playing ? 'Pause focused ultrasound' : 'Play focused ultrasound'}>{playing ? 'Pause' : 'Play'}</button>
       <button type="button" onClick={replay} disabled={unavailable}>Replay</button>
-      <p className="focus-caption">{physicalDurationUs.toFixed(0)} μs of propagation → {REPLAY_MS / 1000} s replay. {completed ? 'Holding a captured focus frame.' : !visible && playing ? 'Playback waits while this view is hidden.' : reduced ? 'Motion plays only when requested.' : 'One pulse, slowed to see its arrival.'}</p>
+      <p className="focus-caption">{physicalDurationUs.toFixed(0)} μs of propagation → {REPLAY_MS / 1000} s replay. {completed ? 'Holding a captured focus frame.' : !visible && playing ? 'Playback waits while this view is hidden.' : reduced ? 'Motion plays only when requested.' : 'Repeats the recorded pulse until paused.'}</p>
     </div>
     <div className="focus-legend"><span><i className="focus-wave-key" /> Pulse envelope · relative amplitude</span><span><i className="focus-anatomy-key" /> Brain atlas</span><span><i className="focus-boundary-key" /> Acoustic boundaries</span></div>
     <WaveModelExplanation fixture={fixture} />
     <details className="focus-methods"><summary>Methods &amp; anatomy source</summary>
       <p>Cached finite pulse envelopes from a fixed 64-element array. Element delays align modelled arrivals at the amber target. The movie displays one x–z slice of the travelling wave packet; the anatomy provides 3D context.</p>
-      <p>The envelope amplitude A is the magnitude of the coherent complex sum of all element pulses, calculated before display. All frames share amplitude scale {fixture.frames.pressureScale.toPrecision(4)} (relative units). Color uses (A / scale)<sup>0.4</sup> and opacity uses (A / scale)<sup>0.3</sup>, with values below 0.4% hidden; clipped int16 samples saturate at the fixed scale. No frame is rescaled. At completion, the strongest sampled target neighborhood within ±2 μs of predicted arrival is held and labeled as a captured packet snapshot.</p>
+      <p>The envelope amplitude A is the magnitude of the coherent complex sum of all element pulses, calculated before display. All frames share amplitude scale {fixture.frames.pressureScale.toPrecision(4)} (relative units). Color uses (A / scale)<sup>0.4</sup> and opacity uses (A / scale)<sup>0.3</sup>, with values below 0.4% hidden; clipped int16 samples saturate at the fixed scale. No frame is rescaled. Each normal playback cycle repeats the same recorded pulse and resets physical time; reduced-motion playback holds the strongest sampled target neighborhood within ±2 μs of predicted arrival as a captured packet snapshot.</p>
       <p><a href={`${import.meta.env.BASE_URL}demo/display-sampling-report.json`}>Display sampling checks</a> document the frozen spatial grid and physical frame interval.</p>
       <p>The fitted <a href="https://github.com/itayinbarr/brainproject" target="_blank" rel="noreferrer">Brain Project atlas by Itay Inbar</a> uses Z-Anatomy / BodyParts3D under CC BY-SA 4.0. <a href={`${import.meta.env.BASE_URL}models/ATTRIBUTION.md`}>Full attribution</a>. The acoustic layers are ellipsoids; the atlas is educational anatomical context.</p>
       {fixture.provenance.assumptions.length > 0 && <ul>{fixture.provenance.assumptions.map(assumption => <li key={assumption}>{assumption}</li>)}</ul>}

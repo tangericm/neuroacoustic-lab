@@ -1,30 +1,30 @@
 {
   "version": 1,
-  "generatedUtc": "2026-10-12T19:56:54.303Z",
+  "generatedUtc": "2026-10-12T20:20:42.259Z",
   "sourceHashes": {
-    "src/core/flow/types.ts": "42c907101b8c368f898f8182b3962d4a65e56e05ca73fa80f4b09e4ae13d3c98",
-    "src/core/flow/acquisition.ts": "470663262c08b094b621d7c0167fcf83a1fea65bbcebe277a7c06974afad9da0",
+    "src/core/flow/types.ts": "c2c506c6ee8de7c8bba26c3505e838fc3e7353e36c5c01ce9b5e9ee524b1f1fa",
+    "src/core/flow/acquisition.ts": "ff3ec05c341a7c6404da356034bb3850902bb8aba5415effde69efc3895e8808",
     "src/core/flow/processing.ts": "6cf6a09ee9314b7ddd015c76928f9a9c3789da28aee40a253078b23db29b6bf2",
     "src/core/flow/motion.ts": "a9f258e77295b8e90d67f6eb20e01521af03a01600ba4b68c62cbc08e0960e6a",
     "src/core/imaging.ts": "8d10ca2ecfa1c60f035a31d866e0ce511b89b8a54c17593bfc1f3e552f29161a",
     "src/core/physics.ts": "39085831336791d0a7c00a45ae614e358275267c34f7903053b9af1a85bf197b",
     "src/core/scenario.ts": "562c22d9d8bd7ca1eb4518f718ff3899038a4efc965d912cbf32f7f84aafd278",
     "src/core/types.ts": "204cc3514cf89db3a8cb817d4562411c68d978335352fa5769b5c9368d996be1",
-    "src/demo/generate-flow-fixture.ts": "a232c7a20a06223182893be1d3ff900ce814279ae1e3d8d21eb4818f43b43f38",
-    "scripts/generate-flow.mjs": "c8e72f199a1b2c226deb2f4fbafbdf459119a67e700273b1b15107284def8cd1",
-    "reference/flow_oracle.py": "96b64895211cc7dda8691e96a3e12ceb844947e981e9f1dce3bf0949fac3e060"
+    "src/demo/generate-flow-fixture.ts": "b6d2a8ad5a499d39a93cab0bd19e5ebb4030b30a87986f62d88a1a98e0f9774f",
+    "scripts/generate-flow.mjs": "aaa44f0ded4c840c47f2f089bf78307e1c9f05c3aab11e556a740d8133a95514",
+    "reference/flow_oracle.py": "8cf296a0acb4e6b5055d1509855d87d9b114288fdf4f277e73286e554be8e2cd"
   },
   "rankFrozen": 2,
   "oracle": {
     "passed": true,
     "numpyVersion": "2.5.1",
-    "elapsedMs": 289.97090039774776,
+    "elapsedMs": 1218.7347998842597,
     "errors": {
-      "iqRelativeL2": 2.7243134527480934e-8,
-      "filteredRelativeL2": 8.193555648403306e-8,
-      "powerRelativeL2": 1.0005728638657508e-8,
-      "singularValueRelativeL2": 1.811554649604258e-10,
-      "velocityMaxAbsErrorMpsOnAcceptedPixels": 2.2213969847612036e-9,
+      "iqRelativeL2": 2.7094118659192835e-8,
+      "filteredRelativeL2": 7.732187547932138e-8,
+      "powerRelativeL2": 8.89867492487749e-9,
+      "singularValueRelativeL2": 9.122799853345423e-11,
+      "velocityMaxAbsErrorMpsOnAcceptedPixels": 8.330986178695099e-10,
       "validMaskDisagreements": 0
     },
     "scope": "Independent analytic RF conversion, geometry-derived DAS, full complex SVD, retained power, lag-one velocity and validity masks. Does not independently validate the acoustic forward model or NCC."
@@ -35,16 +35,18 @@
       "config": {
         "seed": 1729,
         "size": 97,
-        "frames": 32,
+        "frames": 64,
         "frameIntervalS": 0.002,
-        "frequencyHz": 1000000,
+        "frequencyHz": 2000000,
         "soundSpeedMps": 1560,
-        "samplingRateHz": 8000000,
-        "samples": 1024,
-        "elementCount": 32,
-        "elementPitchM": 0.00075,
-        "elementRadiusM": 0.0003,
-        "probeZM": 0.1,
+        "attenuationDbCmAtMHz": 0.5,
+        "attenuationPower": 1,
+        "samplingRateHz": 16000000,
+        "samples": 2048,
+        "elementCount": 64,
+        "elementPitchM": 0.00035,
+        "elementRadiusM": 0.00015,
+        "probeZM": 0.085,
         "centerZM": 0.04,
         "extentM": 0.04,
         "tissueDisplacementM": 0.00043,
@@ -53,38 +55,87 @@
         "clutterRank": 2
       },
       "metrics": {
-        "tissueRejectionDb": 33.64464255811821,
-        "bloodRetentionDb": -0.3749974340392695,
-        "vesselBackgroundBeforeDb": -4.7930132571665425,
-        "vesselBackgroundAfterDb": 10.880805533094586,
+        "branchPowerContrastDb": [
+          {
+            "id": "trunk",
+            "contrastDb": 9.152890335377581,
+            "coverage": 1,
+            "evaluatedPixels": 78
+          },
+          {
+            "id": "left-fork",
+            "contrastDb": 9.531740153418239,
+            "coverage": 1,
+            "evaluatedPixels": 89
+          },
+          {
+            "id": "right-fork",
+            "contrastDb": 11.381053500340286,
+            "coverage": 1,
+            "evaluatedPixels": 88
+          },
+          {
+            "id": "left-outer",
+            "contrastDb": 8.669689641720362,
+            "coverage": 1,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "left-inner",
+            "contrastDb": 8.446867792459079,
+            "coverage": 1,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "right-inner",
+            "contrastDb": 10.181139870779703,
+            "coverage": 1,
+            "evaluatedPixels": 84
+          },
+          {
+            "id": "right-outer",
+            "contrastDb": 8.809831876046276,
+            "coverage": 1,
+            "evaluatedPixels": 88
+          }
+        ],
+        "tubePowerFwhmM": [
+          0.0020833333333333333,
+          0.00375
+        ],
+        "networkPowerContrastDb": 9.601345393153418,
+        "tissueRejectionDb": 24.112256800371064,
+        "bloodRetentionDb": -0.02051568188601377,
+        "vesselBackgroundBeforeDb": -8.132887781868426,
+        "vesselBackgroundAfterDb": 6.416075559255305,
         "tubeMedianVelocityMps": [
-          0.036567520539895475,
-          -0.03583989052108232
+          0.03574778818989529,
+          -0.0370644758709386
         ],
         "tubeTruthVelocityMps": [
           0.04,
           -0.04
         ],
-        "tubeCoverage": 0.3082191780821918,
+        "tubeCoverage": 0.9825653798256538,
         "tubeSignAccuracy": 1,
-        "tubeVelocityMaeMps": 0.005155403522831831,
-        "motionMedianM": 0.00043039660843795024,
-        "motionMedianAbsoluteErrorM": 0.000012716516836630857,
+        "tubeVelocityMaeMps": 0.0037808415034898744,
+        "motionMedianM": 0.0004289164489930549,
+        "motionMedianAbsoluteErrorM": 0.000004625041161828412,
         "motionCoverage": 1,
         "motionEvaluated": 96,
         "noiseOnlyValidFraction": 0,
-        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
-        "gramResidual": 9.872207905837766e-14,
-        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.11755502123380246,
+        "gramResidual": 9.868293190042404e-14,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Branch interiors use 0.6 times radius and z=25–55 mm; network background is x>=0 with 2 mm vessel guard. Junction pixels may count in both connected branches. Tube FWHM counts contiguous half-peak bins in z=30–50 mm mean-power profiles within 3.5 mm of each center; finite-vessel speckle widths, not point-spread-function measurements. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
       },
       "timingsMs": {
-        "rf": 2008.9682,
-        "delayPlan": 8.269999999999982,
-        "beamform": 51.43139999999994,
-        "svd": 23.117699999999786,
-        "doppler": 5.920100000000275,
-        "motion": 5.063900000000103,
-        "componentValidation": 163.15290000000005
+        "rf": 10407.6639,
+        "delayPlan": 18.614699999998265,
+        "beamform": 350.78769999999895,
+        "svd": 66.41059999999925,
+        "doppler": 9.20089999999982,
+        "motion": 5.2422999999998865,
+        "componentValidation": 1016.0213000000003
       }
     },
     {
@@ -92,16 +143,18 @@
       "config": {
         "seed": 2027,
         "size": 97,
-        "frames": 32,
+        "frames": 64,
         "frameIntervalS": 0.002,
-        "frequencyHz": 1000000,
+        "frequencyHz": 2000000,
         "soundSpeedMps": 1560,
-        "samplingRateHz": 8000000,
-        "samples": 1024,
-        "elementCount": 32,
-        "elementPitchM": 0.00075,
-        "elementRadiusM": 0.0003,
-        "probeZM": 0.1,
+        "attenuationDbCmAtMHz": 0.5,
+        "attenuationPower": 1,
+        "samplingRateHz": 16000000,
+        "samples": 2048,
+        "elementCount": 64,
+        "elementPitchM": 0.00035,
+        "elementRadiusM": 0.00015,
+        "probeZM": 0.085,
         "centerZM": 0.04,
         "extentM": 0.04,
         "tissueDisplacementM": 0.00037,
@@ -110,38 +163,87 @@
         "clutterRank": 2
       },
       "metrics": {
-        "tissueRejectionDb": 37.0365395015682,
-        "bloodRetentionDb": -0.3747719185361431,
-        "vesselBackgroundBeforeDb": -3.369755819935571,
-        "vesselBackgroundAfterDb": 12.282090938870969,
+        "branchPowerContrastDb": [
+          {
+            "id": "trunk",
+            "contrastDb": 11.66693181000758,
+            "coverage": 1,
+            "evaluatedPixels": 78
+          },
+          {
+            "id": "left-fork",
+            "contrastDb": 11.333124791056804,
+            "coverage": 1,
+            "evaluatedPixels": 89
+          },
+          {
+            "id": "right-fork",
+            "contrastDb": 12.139375409839857,
+            "coverage": 1,
+            "evaluatedPixels": 88
+          },
+          {
+            "id": "left-outer",
+            "contrastDb": 10.988858563172034,
+            "coverage": 1,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "left-inner",
+            "contrastDb": 11.226761859568771,
+            "coverage": 1,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "right-inner",
+            "contrastDb": 9.87754516205424,
+            "coverage": 1,
+            "evaluatedPixels": 84
+          },
+          {
+            "id": "right-outer",
+            "contrastDb": 8.92695600369744,
+            "coverage": 1,
+            "evaluatedPixels": 88
+          }
+        ],
+        "tubePowerFwhmM": [
+          0.0033333333333333335,
+          0.00375
+        ],
+        "networkPowerContrastDb": 10.983804524195818,
+        "tissueRejectionDb": 26.499524520850066,
+        "bloodRetentionDb": -0.01946247761177355,
+        "vesselBackgroundBeforeDb": -8.137377182486082,
+        "vesselBackgroundAfterDb": 8.602910789537985,
         "tubeMedianVelocityMps": [
-          0.038133338158673744,
-          -0.035396349597245344
+          0.03626652459791022,
+          -0.03730282114039442
         ],
         "tubeTruthVelocityMps": [
           0.04,
           -0.04
         ],
-        "tubeCoverage": 0.5114155251141552,
+        "tubeCoverage": 0.9950186799501868,
         "tubeSignAccuracy": 1,
-        "tubeVelocityMaeMps": 0.0035850184578979614,
-        "motionMedianM": 0.0003699081321607681,
-        "motionMedianAbsoluteErrorM": 0.000013037367523893782,
+        "tubeVelocityMaeMps": 0.0032271200114929463,
+        "motionMedianM": 0.0003790042227602547,
+        "motionMedianAbsoluteErrorM": 0.000009423966398492746,
         "motionCoverage": 1,
         "motionEvaluated": 96,
         "noiseOnlyValidFraction": 0,
-        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
-        "gramResidual": 9.712287042965281e-14,
-        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.11755502123380246,
+        "gramResidual": 9.993192891310953e-14,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Branch interiors use 0.6 times radius and z=25–55 mm; network background is x>=0 with 2 mm vessel guard. Junction pixels may count in both connected branches. Tube FWHM counts contiguous half-peak bins in z=30–50 mm mean-power profiles within 3.5 mm of each center; finite-vessel speckle widths, not point-spread-function measurements. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
       },
       "timingsMs": {
-        "rf": 2280.2437999999997,
-        "delayPlan": 11.391000000000531,
-        "beamform": 61.156599999999344,
-        "svd": 21.250500000000102,
-        "doppler": 6.636300000000119,
-        "motion": 7.990499999999884,
-        "componentValidation": 192.85789999999997
+        "rf": 10776.8518,
+        "delayPlan": 18.063700000002427,
+        "beamform": 315.5614999999998,
+        "svd": 57.196600000002945,
+        "doppler": 36.47599999999875,
+        "motion": 7.403500000000349,
+        "componentValidation": 1048.5943999999981
       }
     },
     {
@@ -149,16 +251,18 @@
       "config": {
         "seed": 811,
         "size": 97,
-        "frames": 32,
+        "frames": 64,
         "frameIntervalS": 0.002,
-        "frequencyHz": 1000000,
+        "frequencyHz": 2000000,
         "soundSpeedMps": 1560,
-        "samplingRateHz": 8000000,
-        "samples": 1024,
-        "elementCount": 32,
-        "elementPitchM": 0.00075,
-        "elementRadiusM": 0.0003,
-        "probeZM": 0.1,
+        "attenuationDbCmAtMHz": 0.5,
+        "attenuationPower": 1,
+        "samplingRateHz": 16000000,
+        "samples": 2048,
+        "elementCount": 64,
+        "elementPitchM": 0.00035,
+        "elementRadiusM": 0.00015,
+        "probeZM": 0.085,
         "centerZM": 0.04,
         "extentM": 0.04,
         "tissueDisplacementM": -0.00029,
@@ -167,38 +271,87 @@
         "clutterRank": 2
       },
       "metrics": {
-        "tissueRejectionDb": 36.45552976863881,
-        "bloodRetentionDb": -0.22643345255326647,
-        "vesselBackgroundBeforeDb": -3.845788817858966,
-        "vesselBackgroundAfterDb": 8.196853989528222,
+        "branchPowerContrastDb": [
+          {
+            "id": "trunk",
+            "contrastDb": 5.653877823264893,
+            "coverage": 0.0641025641025641,
+            "evaluatedPixels": 78
+          },
+          {
+            "id": "left-fork",
+            "contrastDb": 5.200397254678713,
+            "coverage": 0.8089887640449438,
+            "evaluatedPixels": 89
+          },
+          {
+            "id": "right-fork",
+            "contrastDb": 3.659723822649348,
+            "coverage": 0.3977272727272727,
+            "evaluatedPixels": 88
+          },
+          {
+            "id": "left-outer",
+            "contrastDb": 4.202258757077683,
+            "coverage": 1,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "left-inner",
+            "contrastDb": 4.290646738445686,
+            "coverage": 1,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "right-inner",
+            "contrastDb": 3.1503247937673517,
+            "coverage": 0.9642857142857143,
+            "evaluatedPixels": 84
+          },
+          {
+            "id": "right-outer",
+            "contrastDb": 4.053359058002176,
+            "coverage": 0.9659090909090909,
+            "evaluatedPixels": 88
+          }
+        ],
+        "tubePowerFwhmM": [
+          0.004166666666666667,
+          0.002916666666666667
+        ],
+        "networkPowerContrastDb": 4.379249725043779,
+        "tissueRejectionDb": 30.56830068256787,
+        "bloodRetentionDb": -0.012490664527440678,
+        "vesselBackgroundBeforeDb": -8.049254035330515,
+        "vesselBackgroundAfterDb": 3.4769893372083853,
         "tubeMedianVelocityMps": [
-          0.038351698873019396,
-          -0.0360565692296713
+          0.03666103927182193,
+          -0.03827146065476356
         ],
         "tubeTruthVelocityMps": [
           0.04,
           -0.04
         ],
-        "tubeCoverage": 0.4920091324200913,
+        "tubeCoverage": 0.43212951432129515,
         "tubeSignAccuracy": 1,
-        "tubeVelocityMaeMps": 0.0034426154066338386,
-        "motionMedianM": -0.0002947394914866553,
-        "motionMedianAbsoluteErrorM": 0.00001767822556566741,
-        "motionCoverage": 1,
+        "tubeVelocityMaeMps": 0.0023387374924172034,
+        "motionMedianM": -0.0002880703508953539,
+        "motionMedianAbsoluteErrorM": 0.000016668703146888056,
+        "motionCoverage": 0.9583333333333334,
         "motionEvaluated": 96,
         "noiseOnlyValidFraction": 0,
-        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
-        "gramResidual": 9.971161196527748e-14,
-        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.11755502123380246,
+        "gramResidual": 9.829785255588466e-14,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Branch interiors use 0.6 times radius and z=25–55 mm; network background is x>=0 with 2 mm vessel guard. Junction pixels may count in both connected branches. Tube FWHM counts contiguous half-peak bins in z=30–50 mm mean-power profiles within 3.5 mm of each center; finite-vessel speckle widths, not point-spread-function measurements. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
       },
       "timingsMs": {
-        "rf": 2171.4128,
-        "delayPlan": 9.767399999999725,
-        "beamform": 50.24579999999969,
-        "svd": 268.3294999999998,
-        "doppler": 7.107399999998961,
-        "motion": 6.776400000000649,
-        "componentValidation": 160.5030999999999
+        "rf": 10783.855599999995,
+        "delayPlan": 22.657200000001467,
+        "beamform": 340.97119999999995,
+        "svd": 375.675900000002,
+        "doppler": 8.845199999996112,
+        "motion": 5.785299999995914,
+        "componentValidation": 1039.119399999996
       }
     },
     {
@@ -206,16 +359,18 @@
       "config": {
         "seed": 2027,
         "size": 97,
-        "frames": 32,
+        "frames": 64,
         "frameIntervalS": 0.002,
-        "frequencyHz": 1000000,
+        "frequencyHz": 2000000,
         "soundSpeedMps": 1560,
-        "samplingRateHz": 8000000,
-        "samples": 1024,
-        "elementCount": 32,
-        "elementPitchM": 0.00075,
-        "elementRadiusM": 0.0003,
-        "probeZM": 0.1,
+        "attenuationDbCmAtMHz": 0.5,
+        "attenuationPower": 1,
+        "samplingRateHz": 16000000,
+        "samples": 2048,
+        "elementCount": 64,
+        "elementPitchM": 0.00035,
+        "elementRadiusM": 0.00015,
+        "probeZM": 0.085,
         "centerZM": 0.04,
         "extentM": 0.04,
         "tissueDisplacementM": 0.00043,
@@ -224,38 +379,87 @@
         "clutterRank": 2
       },
       "metrics": {
-        "tissueRejectionDb": 33.76226360302114,
-        "bloodRetentionDb": -11.384246068488206,
-        "vesselBackgroundBeforeDb": -3.4846206709358367,
-        "vesselBackgroundAfterDb": 6.532443745759262,
+        "branchPowerContrastDb": [
+          {
+            "id": "trunk",
+            "contrastDb": 3.5395943345760745,
+            "coverage": 0.5641025641025641,
+            "evaluatedPixels": 78
+          },
+          {
+            "id": "left-fork",
+            "contrastDb": 2.796553433540649,
+            "coverage": 0.449438202247191,
+            "evaluatedPixels": 89
+          },
+          {
+            "id": "right-fork",
+            "contrastDb": 4.938493223077369,
+            "coverage": 0.6022727272727273,
+            "evaluatedPixels": 88
+          },
+          {
+            "id": "left-outer",
+            "contrastDb": 3.232895739886607,
+            "coverage": 0.5324675324675324,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "left-inner",
+            "contrastDb": 3.7656737138229253,
+            "coverage": 0.6493506493506493,
+            "evaluatedPixels": 77
+          },
+          {
+            "id": "right-inner",
+            "contrastDb": 1.2964494047084851,
+            "coverage": 0.4523809523809524,
+            "evaluatedPixels": 84
+          },
+          {
+            "id": "right-outer",
+            "contrastDb": 2.2756830860720503,
+            "coverage": 0.5,
+            "evaluatedPixels": 88
+          }
+        ],
+        "tubePowerFwhmM": [
+          0.0020833333333333333,
+          0.00375
+        ],
+        "networkPowerContrastDb": 3.247478167415192,
+        "tissueRejectionDb": 23.958966556308177,
+        "bloodRetentionDb": -4.157268003524483,
+        "vesselBackgroundBeforeDb": -8.13890994967758,
+        "vesselBackgroundAfterDb": 4.820440054357082,
         "tubeMedianVelocityMps": [
-          0.005521479450964824,
-          -0.0013917265578510065
+          0.0019164513865106826,
+          -0.0018100988487806718
         ],
         "tubeTruthVelocityMps": [
           0.002,
           -0.002
         ],
-        "tubeCoverage": 0.0867579908675799,
-        "tubeSignAccuracy": 0.9736842105263158,
-        "tubeVelocityMaeMps": 0.0011409566938397509,
-        "motionMedianM": 0.0004357812205005308,
-        "motionMedianAbsoluteErrorM": 0.000014410566452559249,
+        "tubeCoverage": 0.4806973848069738,
+        "tubeSignAccuracy": 0.9818652849740933,
+        "tubeVelocityMaeMps": 0.00039197352909453944,
+        "motionMedianM": 0.00043001259375345484,
+        "motionMedianAbsoluteErrorM": 0.000005193137803119138,
         "motionCoverage": 1,
         "motionEvaluated": 96,
         "noiseOnlyValidFraction": 0,
-        "nearAxisMeanSensitivityMaxRelativeBias": 0.043894323321234996,
-        "gramResidual": 1.8180479938035926e-13,
-        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
+        "nearAxisMeanSensitivityMaxRelativeBias": 0.11755502123380246,
+        "gramResidual": 4.314486738036405e-13,
+        "evaluation": "Tube interiors within 1.2 mm of centers and z=25–55 mm; tissue/background excludes vessel radius plus 3 mm. Branch interiors use 0.6 times radius and z=25–55 mm; network background is x>=0 with 2 mm vessel guard. Junction pixels may count in both connected branches. Tube FWHM counts contiguous half-peak bins in z=30–50 mm mean-power profiles within 3.5 mm of each center; finite-vessel speckle widths, not point-spread-function measurements. Truth masks are evaluation only. Noise-only uses the mixed-data projector and identical mixed-data gates. Near-axis bias uses unweighted receive-direction mean, a geometry diagnostic rather than a correction."
       },
       "timingsMs": {
-        "rf": 2126.5465999999997,
-        "delayPlan": 10.561799999999494,
-        "beamform": 50.89819999999963,
-        "svd": 18.09939999999915,
-        "doppler": 5.544400000000678,
-        "motion": 5.353300000000672,
-        "componentValidation": 172.40070000000014
+        "rf": 10801.164600000004,
+        "delayPlan": 22.296900000001187,
+        "beamform": 416.64910000000236,
+        "svd": 64.33209999999963,
+        "doppler": 10.013899999998102,
+        "motion": 6.970900000000256,
+        "componentValidation": 1187.655200000001
       }
     }
   ],
@@ -263,18 +467,18 @@
   "archives": [
     {
       "name": "flow_rf.f32.gz",
-      "bytes": 3987718,
-      "sha256": "9dd9ceb155b7afd6e5348177fcb0c4d596c908fbd1c6c42cf6b21245ed85f256"
+      "bytes": 31869477,
+      "sha256": "de5119efd2141cfb1a160c6c25d34513153e6d1740741659208d1d675615a9f1"
     },
     {
       "name": "flow_iq.f32.gz",
-      "bytes": 2240775,
-      "sha256": "3ff7f8419649a73d11bd2ca594e18f12c7b5987d7356daa6f0803160be24b1f3"
+      "bytes": 4493383,
+      "sha256": "07ac812348bf407869ab4062d30e751a5bcaa8a3d58ad4993725ce2a7a8dd73a"
     },
     {
       "name": "flow_filtered.f32.gz",
-      "bytes": 2248466,
-      "sha256": "a391ec2aba43959d83b2aefa74d1dac3baccc18271cdaa442ef81bb1b72c8e85"
+      "bytes": 4490982,
+      "sha256": "5a36c22a370a2acdf9828afe0bee61a3388b3d5767b573e9f162697a637e02e9"
     }
   ]
 }

@@ -1,0 +1,11 @@
+# Fixed recruiter demonstrations
+
+Approved in chat: keep a 3D brain with travelling wavefronts; use one fixed plane and target; separate focused ultrasound from imaging; simplify controls and improve contrast. Vercel Web Analytics remains active.
+
+The landing page has two clearly labeled experiences. Focused ultrasound shows the existing 64-element curved array and fixed target `(15,0,15) mm`, with a finite pulse crossing a fixed x–z plane. Only Play/Pause and Replay control the experiment. Camera orbit is optional and does not change the acoustic configuration. Ultrasound imaging uses its own seeded synthetic-aperture experiment and reveals recorded echoes, their calculated timing alignment, and genuine partial delay-and-sum reconstructions. It never claims that the focused-transmit movie generated its RF channels.
+
+The visual hierarchy emphasizes one scene and one explanation at a time. Anatomy is warm ivory, the target amber, the waves bright cyan/white, and skull boundaries restrained outlines. The wave display uses one fixed pressure scale and disclosed nonlinear display contrast. Imaging comparisons use the same RF and a shared image scale; an intentionally incorrect assumed sound speed is identified as an educational calibration example.
+
+Freeze propagation, RF, and reconstruction fixtures at generation time. Browser playback only decodes cached frames and paints data; the landing experience creates no simulation worker. Pause/offscreen/reduced-motion states stop animated rendering. Keep physical time separate from slowed playback. Preserve the existing full simulator, references, source attribution, and methods through a lazy-loaded advanced-lab entry.
+
+Acceptance: no target/material/geometry knobs on the landing experience; visible travelling arrivals at the fixed target; independently identified imaging acquisition; data-derived partial sums and traces; no field or image fabricated to suggest improvement; desktop and stacked mobile layouts; no idle rendering loop; WebGL failure leaves imaging available; analytics and old scenario links still work; production build, scientific checks, browser QA, and independent review before release.

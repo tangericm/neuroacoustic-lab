@@ -37,9 +37,26 @@ export function preparePathSolver(medium:Medium,frequencyHz:number,homogeneous=f
   return {travelTimeS,amplitude:transmission*10**(-attenuationDb/20)*.1/Math.max(.001,lengthM),attenuationDb,lengthM,layerLengthsM};
   };
 }
-// Convergent J1 series; the supported element/frequency range has ka <= 18.
+// Small-x power series plus a stable large-x Hankel expansion for signed J1.
+// Original implementation of NIST DLMF 10.17.1 and 10.17.3 (nu=1):
+// https://dlmf.nist.gov/10.17.E1 and https://dlmf.nist.gov/10.17.E3.
+// No third-party implementation or coefficient table is copied.
 export function pistonDirectivity(x:number):number {
-  if(Math.abs(x)<1e-8)return 1;
+  const a=Math.abs(x);
+  if(a<1e-8)return 1;
+  if(a>=16){
+    let term=1,even=1,odd=0;
+    for(let k=1;k<=128;k++){
+      const next=term*(4-(2*k-1)**2)/(8*k*a);
+      // Asymptotic terms eventually grow: truncate before the first increase.
+      if(Math.abs(next)>Math.abs(term))break;
+      term=next;const signed=(Math.floor(k/2)%2===0?1:-1)*term;
+      if(k%2===0)even+=signed;else odd+=signed;
+      if(Math.abs(term)<Number.EPSILON*.1)break;
+    }
+    const phase=a-3*Math.PI/4;
+    return 2*Math.sqrt(2/(Math.PI*a))*(Math.cos(phase)*even-Math.sin(phase)*odd)/a;
+  }
   let term=x/2,sum=term;for(let k=1;k<60;k++){term*=-(x*x/4)/(k*(k+1));sum+=term;if(Math.abs(term)<1e-14)break;}
   return 2*sum/x;
 }

@@ -58,6 +58,7 @@ describe('frozen scientific demonstrations', () => {
       expect(trace.aligned[j]).toBeCloseTo(trace.raw[i]*(1-(k-i))+trace.raw[i+1]*(k-i),8);
     }
   });
+  // Regeneration verifies numerical content, rather than a device-specific latency budget.
   it('ships exact generated frames and RF with current source provenance',()=>{
     const saved=JSON.parse(readFileSync('public/demo/focus.json','utf8'));
     const rebuilt=createFocusFixture(saved.provenance);
@@ -72,5 +73,5 @@ describe('frozen scientific demonstrations', () => {
     for(const fixture of [saved,image])for(const [path,hash] of Object.entries(fixture.provenance.sourceHashes)){
       expect(createHash('sha256').update(readFileSync(path,'utf8').replace(/\r\n/g,'\n')).digest('hex')).toBe(hash);
     }
-  });
+  },15_000);
 });

@@ -14,4 +14,4 @@ Ruling: coordinate independent core, UI, and offline-reference work through the 
 
 ## Progress
 
-- Repository initialized. Shared contracts established. Implementation and validation pending.
+- Core, interface, independent oracle, and six full-wave reference runs implemented. Scientific task review passed after input/provenance fixes. Browser QA and interface review are underway before release.

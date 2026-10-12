@@ -55,5 +55,6 @@ export function useSimulation(scenario: Scenario, onOptimize: (s: Scenario) => v
     setOptimizing(false); setBusy(true);
     requestedId.current = id; active.current = true; replaceWorker().postMessage({ type: 'simulate', id, scenario } satisfies WorkerRequest);
   }, [scenario, replaceWorker]);
-  return { result, busy, error, optimizing, progress, optimization, optimize, cancel };
+  const clearOptimization = useCallback(() => { setOptimization(undefined); setProgress([0, 1]); setError(''); }, []);
+  return { result, busy, error, optimizing, progress, optimization, optimize, cancel, clearOptimization };
 }

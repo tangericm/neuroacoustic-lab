@@ -29,7 +29,7 @@ npm run build
 npm test
 ```
 
-`npm run test:e2e` runs the Playwright suite when its browser is installed. The static build is written to `dist/` and can be deployed to Vercel as a Vite project with `npm run build` and `dist` as the output directory. The repository includes `vercel.json` for static client-side routing. A GitHub-to-Vercel connection can publish the site on pushes; publication is a separate deployment action.
+The static build is written to `dist/` and can be deployed to Vercel as a Vite project with `npm run build` and `dist` as the output directory. The application uses a single static entry page and hash-based scenario links. A GitHub-to-Vercel connection can publish the site on pushes; publication is a separate deployment action.
 
 ## Model and evidence
 
@@ -39,7 +39,7 @@ It omits refraction, diffraction beyond the element approximation, shear and mod
 
 The independent NumPy/SciPy float64 oracle checks the same straight-ray model against the TypeScript engine; that is numerical verification of shared assumptions, not physical validation. A separate set of six actual k-Wave 3D full-wave runs compares a compact planar water/bone/brain fixture with ray calculations. At the fine 0.5 mm spacing, straight-ray delay correction raised target pressure by about 1.05 dB and moved the planar focus error from 10.5 mm to 7.0 mm. The fine-grid free-water plane has about 5.2% normalized L2 disagreement with the ray model; the corrected slab plane has about 41.4%. The 0.625 mm and 0.5 mm comparison is a two-grid sensitivity check, not evidence of asymptotic convergence. This compact slab fixture does not validate the interactive head geometry.
 
-One local Node/Vitest default simulation snapshot measured about 787 ms end-to-end. This is a machine- and runtime-specific measurement, not a browser latency or frame-rate result; browser performance has not been established across devices.
+In local measurements on an RTX 5080 system, a fresh-process Node simulation took about 595 ms; a browser run took about 807 ms cold, about 491 ms warm, and about 959 ms after a target change. Rendering measured 60 FPS over one one-second window. These are bounded snapshots, not guaranteed latency or sustained frame-rate claims. Returned typed-array payload is 7,332,864 bytes (about 7 MiB), excluding an approximately 7.1 MB retained path cache.
 
 See [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for commands, fixture provenance, hashes, and evidence scope. The implementation contract and metric definitions are in [src/core/IMPLEMENTATION.md](src/core/IMPLEMENTATION.md).
 

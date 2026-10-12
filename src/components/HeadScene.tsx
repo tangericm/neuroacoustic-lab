@@ -8,6 +8,8 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import * as THREE from 'three';
 import type { FieldPlane, Scenario, Vec3 } from '../core/types';
 import { fitScale, includeAtlasCategory } from '../hooks/anatomy';
+import { useOwnedResource } from '../hooks/useOwnedResource';
+import { SceneErrorBoundary, sceneUnavailable } from './SceneErrorBoundary';
 
 export function pressureColor(value: number): [number, number, number] {
   const t = Math.max(0, Math.min(1, value));
@@ -61,6 +63,7 @@ function Brain({ scenario, clips, onTarget }: { scenario: Scenario; clips: THREE
     geometry.translate(-center.x, -center.y, -center.z);
     return geometry;
   }, [gltf, categories]);
+  useOwnedResource(mergedGeometry);
   const brain = useMemo(() => {
     const copy = new THREE.Mesh(mergedGeometry, new THREE.MeshStandardMaterial({ color: '#a3a6b1', roughness: .8, metalness: .04, side: THREE.DoubleSide, clippingPlanes: clips }));
     const inner = scenario.medium.outerRadiiM.map(r => r - scenario.medium.scalpThicknessM - scenario.medium.skullThicknessM - scenario.medium.fluidThicknessM);
@@ -88,7 +91,7 @@ function FieldMesh({ field, normalization, phase }: { field: FieldPlane; normali
     const t = new THREE.DataTexture(fieldPixels(field, normalization, phase), field.size, field.size, THREE.RGBAFormat);
     t.needsUpdate = true; t.magFilter = THREE.LinearFilter; t.flipY = true; return t;
   }, [field, normalization, phase]);
-  useEffect(() => () => texture.dispose(), [texture]);
+  useOwnedResource(texture);
   return <mesh position={[field.centerM[0], field.centerM[1] - .0003, field.centerM[2]]} rotation={[Math.PI / 2, 0, 0]} renderOrder={5}><planeGeometry args={[field.extentM, field.extentM]} /><meshBasicMaterial map={texture} side={THREE.DoubleSide} transparent opacity={.45} depthWrite={false} /></mesh>;
 }
 function Head({ scenario, field, normalization, phase, selected, onSelect, onTarget, cutaway, layers }: SceneProps) {
@@ -105,10 +108,10 @@ function Head({ scenario, field, normalization, phase, selected, onSelect, onTar
     {layers.skull && [skullOuter, skullInner].map((radii, i) => <mesh key={i} scale={radii}><sphereGeometry args={[1, 72, 48]} /><meshStandardMaterial color="#dcc9aa" transparent opacity={i === 0 ? .04 : .025} side={THREE.DoubleSide} clippingPlanes={clips} depthWrite={false} /></mesh>)}
     <Line points={circle} color="#34525d" lineWidth={1} transparent opacity={.5} />
     {scenario.array.elements.map(element => <ElementDisk key={element.id} element={element} selected={selected === element.id} onSelect={() => onSelect(element.id)} />)}
-    {selected !== null && <Line points={[scenario.array.elements.find(e => e.id === selected)?.position ?? [0, 0, 0], scenario.targetM]} color="#f1ba68" lineWidth={1} dashed dashSize={.003} gapSize={.002} transparent opacity={.7} />}
+    {selected !== null && <Line points={[scenario.array.elements.find(e => e.id === selected)?.position ?? [0, 0, 0], scenario.targetM]} color="#f1ba68" lineWidth={1} dashed dashSize={.003} gapSize={.002} transparent opacity={.7} depthTest={false} renderOrder={9} />}
     {field && <FieldMesh field={field} normalization={normalization} phase={phase} />}
     <mesh position={[0, scenario.targetM[1], 0]} rotation={[Math.PI / 2, 0, 0]} onClick={e => { e.stopPropagation(); onTarget(e.point.toArray() as Vec3); }}><planeGeometry args={[outer[0] * 2, outer[2] * 2]} /><meshBasicMaterial transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} /></mesh>
-    <group position={scenario.targetM}><mesh><sphereGeometry args={[.0021, 20, 20]} /><meshBasicMaterial color="#ffcb76" /></mesh><mesh><sphereGeometry args={[.004, 20, 20]} /><meshBasicMaterial color="#ffdba1" wireframe transparent opacity={.45} /></mesh></group>
+    <group position={scenario.targetM}><mesh renderOrder={10}><sphereGeometry args={[.0021, 20, 20]} /><meshBasicMaterial color="#ffcb76" depthTest={false} depthWrite={false} /></mesh><mesh renderOrder={11}><sphereGeometry args={[.004, 20, 20]} /><meshBasicMaterial color="#ffdba1" wireframe transparent opacity={.45} depthTest={false} depthWrite={false} /></mesh></group>
     <Line points={[[-.065, -.13, -.11], [-.025, -.13, -.11]]} color="#9cb5be" lineWidth={2} />
     <OrbitControls makeDefault enableDamping minDistance={.16} maxDistance={.7} target={[0, 0, .005]} />
   </>;
@@ -123,7 +126,7 @@ export default function HeadScene(props: SceneProps) {
   const [unavailable, setUnavailable] = useState(false);
   const [fps, setFps] = useState<number>();
   return <div className="scene-canvas">
-    {unavailable ? <div className="scene-fallback">3D rendering is unavailable on this device. Use the target coordinates and field maps below.</div> : <Canvas camera={{ position: [.28, -.36, .23], up: [0, 0, 1], near: .001, far: 3, fov: 34 }} dpr={[1, 1.7]} gl={{ antialias: true, localClippingEnabled: true }} onCreated={({ gl }) => { gl.domElement.addEventListener('webglcontextlost', () => setUnavailable(true)); }}><Head {...props} /><FrameMeter onRate={setFps} /></Canvas>}
-    <span className="frame-meter">{fps === undefined ? 'Measuring render cadence…' : `${fps.toFixed(0)} FPS · measured 1 s window`}</span>
+    <SceneErrorBoundary onError={() => setUnavailable(true)}>{unavailable ? sceneUnavailable : <Canvas camera={{ position: [.28, -.36, .23], up: [0, 0, 1], near: .001, far: 3, fov: 34 }} dpr={[1, 1.7]} gl={{ antialias: true, localClippingEnabled: true }} onCreated={({ gl }) => { gl.domElement.addEventListener('webglcontextlost', () => setUnavailable(true)); }}><Head {...props} /><FrameMeter onRate={setFps} /></Canvas>}</SceneErrorBoundary>
+    <span className="frame-meter">{unavailable ? '3D unavailable · numerical views remain active' : fps === undefined ? 'Measuring render cadence…' : `${fps.toFixed(0)} FPS · measured 1 s window`}</span>
   </div>;
 }

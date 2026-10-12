@@ -39,7 +39,7 @@
 - [x] Fixture generation and scientific checks. Final focus quantity is the coherent pulse envelope; carrier aliasing and retained display sampling limits are documented.
 - [x] Focus scene and playback checks.
 - [x] Landing/imaging presentation and interaction checks.
-- [ ] Integrated review, production-browser checks, and release.
+- [x] Integrated review, production-browser checks, and release. Implementation `a517592`; GitHub CI run `38296733763` passed; production deployment `dpl_BEWZrj9ff6gyPoTWfaLtr4qBkgew` is ready at the existing domain.
 
 Ruling: use the clean standalone checkout on a feature branch, with separate file ownership; dependencies and offline reference environment already live here. Cross-file integration is verified by the controller.
 Ruling: the user's “proceed” authorizes implementation and the existing GitHub/Vercel release workflow; no repeated design-approval round is needed.

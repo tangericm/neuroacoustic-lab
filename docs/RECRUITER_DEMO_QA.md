@@ -14,3 +14,5 @@ Checked October 12, 2026 on the local Windows workstation in the Chromium-based 
 The default view uses cached data and creates no numerical worker. Focus-frame decoding retains 14,930,432 bytes; the gzip asset is 3,831,524 bytes. These are fixture-buffer sizes, not whole-tab memory measurements. New default latency and sustained FPS were not benchmarked; the earlier browser timing/FPS results apply to the advanced simulator.
 
 Release gates: 82 JavaScript tests, 17 independent Python reference tests, strict TypeScript, production build, and independent implementation review passed. Final production-origin and CI results are recorded in `docs/IMPLEMENTATION.md`.
+
+Production-origin checks also passed: both experiments rendered; the compressed focus data and imaging JSON match local hashes; page and analytics SDK return HTTP 200. [Retained production screenshot](figures/recruiter-demo.jpg).

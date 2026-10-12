@@ -14,4 +14,19 @@ Ruling: coordinate independent core, UI, and offline-reference work through the 
 
 ## Progress
 
-- Core, interface, independent oracle, and six full-wave reference runs implemented. Scientific task review passed after input/provenance fixes. Browser QA and interface review are underway before release.
+- Core, interface, independent float64 oracle, and six actual 3D k-Wave runs are implemented. Scientific and interface task reviews passed after fixes to input validation, bounded phantom placement, cached solver provenance, renderer fallback, resource ownership, and restoration.
+- The whole-project audit found a high-argument directivity cancellation error in accepted shared scenarios. An original NIST DLMF implementation and 134 SciPy fixtures corrected it. Scoped independent review cleared the issue, including a 40,001-point numerical sweep.
+- Root verification after that correction: 53 JavaScript tests, 17 Python tests, strict TypeScript, production build, and npm dependency audit passed. Browser checks are recorded in `BROWSER_QA.md`.
+- Final browser testing found a Drei loading-overlay teardown error. The final UI change moves atlas status into the outer React DOM tree and starts the walkthrough with uncorrected delays. Scoped review cleared it; fresh production reload, atlas remount, and the correction step produced no new browser errors. Final verification: 55 JavaScript tests and the production build pass, with 17 Python tests passed after the final numerical change. The dependency audit reports zero known vulnerabilities.
+
+## Scientific and implementation rulings
+
+- Selected-element visualizations use actual complex, weighted contributions from the same propagation cache; their sum must equal the coherent pressure map.
+- Placement search maximizes a fixed-drive target/off-focus ratio on a disclosed coarse 17 × 17 in-brain plane, with an 8 mm exclusion. It preserves the chosen propagation mode and reports every candidate. Fine-grid or whole-volume sidelobes can rank differently.
+- The atlas provides visual context while the rendered ellipsoids define acoustic boundaries. This distinction is visible in the scene and methods.
+- The six full-wave fixtures have frozen compact slab geometry and matched amplitude scales. Published disagreements and two-grid sensitivities are evidence for those fixtures, not validation of arbitrary interactive heads.
+- Scientific implementation and final audit retained higher-capability models. Bounded documentation and packaging used a lower-tier model, as requested.
+
+## Release
+
+GitHub and Vercel publication follows the final UI review and browser check. The deployed URL, commit, and CI outcome will be recorded here.

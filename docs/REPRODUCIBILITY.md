@@ -28,6 +28,8 @@ npm test
 
 This is same-model verification: both implementations encode the same scalar straight-ray assumptions. It does not demonstrate that those assumptions describe real cranial propagation.
 
+`tests/core.directivity.scipy.json` adds 134 independent SciPy 1.18.0 values for signed piston directivity `2 J1(x) / x`, covering the large-argument branch, zeros, and the admitted high-frequency domain through `x=40`. The original TypeScript implementation uses the power series below 16 and the NIST DLMF Hankel expansion above it. A separate review against SciPy 1.15.3 sampled 40,001 arguments over `[0,40]` and measured a maximum absolute error of `4.04e-12`; negative-input parity error was zero.
+
 ## Reproduce the full-wave fixture
 
 The checked-in `public/reference/fullwave.json` was produced by six actual 3D k-Wave Python/CuPy GPU solver runs. Re-run them with:

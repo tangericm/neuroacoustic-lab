@@ -1,7 +1,6 @@
-import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { Html, Line, OrbitControls } from '@react-three/drei';
+import { Line, OrbitControls } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -10,6 +9,8 @@ import type { FieldPlane, Scenario, Vec3 } from '../core/types';
 import { fitScale, includeAtlasCategory } from '../hooks/anatomy';
 import { useOwnedResource } from '../hooks/useOwnedResource';
 import { SceneErrorBoundary, sceneUnavailable } from './SceneErrorBoundary';
+import { AnatomyBoundary, AnatomyReady, AnatomyStatus } from './AnatomyStatus';
+import type { AnatomyLoadState } from './AnatomyStatus';
 
 export function pressureColor(value: number): [number, number, number] {
   const t = Math.max(0, Math.min(1, value));
@@ -34,7 +35,7 @@ export function fieldPixels(field: FieldPlane, normalization: number, phase?: nu
   return pixels;
 }
 
-function Brain({ scenario, clips, onTarget }: { scenario: Scenario; clips: THREE.Plane[]; onTarget: (point: Vec3) => void }) {
+function Brain({ scenario, clips, onTarget, onReady }: { scenario: Scenario; clips: THREE.Plane[]; onTarget: (point: Vec3) => void; onReady: () => void }) {
   const gltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/brain.glb`, loader => { const draco = new DRACOLoader(); draco.setDecoderPath(`${import.meta.env.BASE_URL}draco/`); loader.setDRACOLoader(draco); });
   const manifestRaw = useLoader(THREE.FileLoader, `${import.meta.env.BASE_URL}models/manifest.json`);
   const categories = useMemo(() => {
@@ -72,12 +73,7 @@ function Brain({ scenario, clips, onTarget }: { scenario: Scenario; clips: THREE
     return container;
   }, [mergedGeometry, clips, scenario.medium]);
   useEffect(() => () => brain.traverse(o => { if (o instanceof THREE.Mesh && o.material instanceof THREE.Material) o.material.dispose(); }), [brain]);
-  return <primitive object={brain} onClick={(e: { point: THREE.Vector3; stopPropagation: () => void }) => { e.stopPropagation(); onTarget(e.point.toArray() as Vec3); }} />;
-}
-class AnatomyBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? this.props.fallback : this.props.children; }
+  return <><primitive object={brain} onClick={(e: { point: THREE.Vector3; stopPropagation: () => void }) => { e.stopPropagation(); onTarget(e.point.toArray() as Vec3); }} /><AnatomyReady onReady={onReady} /></>;
 }
 function ElementDisk({ element, selected, onSelect }: { element: Scenario['array']['elements'][number]; selected: boolean; onSelect: () => void }) {
   const quaternion = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(...element.normal).normalize()), [element.normal]);
@@ -94,7 +90,7 @@ function FieldMesh({ field, normalization, phase }: { field: FieldPlane; normali
   useOwnedResource(texture);
   return <mesh position={[field.centerM[0], field.centerM[1] - .0003, field.centerM[2]]} rotation={[Math.PI / 2, 0, 0]} renderOrder={5}><planeGeometry args={[field.extentM, field.extentM]} /><meshBasicMaterial map={texture} side={THREE.DoubleSide} transparent opacity={.45} depthWrite={false} /></mesh>;
 }
-function Head({ scenario, field, normalization, phase, selected, onSelect, onTarget, cutaway, layers }: SceneProps) {
+function Head({ scenario, field, normalization, phase, selected, onSelect, onTarget, cutaway, layers, onAnatomyReady, onAnatomyError }: SceneProps & { onAnatomyReady: () => void; onAnatomyError: () => void }) {
   const clips = useMemo(() => cutaway ? [new THREE.Plane(new THREE.Vector3(0, -1, 0), scenario.targetM[1])] : [], [cutaway, scenario.targetM]);
   const outer = scenario.medium.outerRadiiM;
   const skullOuter = outer.map(r => r - scenario.medium.scalpThicknessM) as Vec3;
@@ -103,7 +99,7 @@ function Head({ scenario, field, normalization, phase, selected, onSelect, onTar
   const circle = Array.from({ length: 100 }, (_, i) => [r * Math.cos(i / 99 * Math.PI * 2), 0, r * Math.sin(i / 99 * Math.PI * 2)] as Vec3);
   return <>
     <ambientLight intensity={.65} /><directionalLight position={[.4, .1, .5]} intensity={2.4} /><pointLight position={[-.2, -.1, .15]} color="#51c8d2" intensity={.015} />
-    {layers.brain && <AnatomyBoundary fallback={<Html center><span className="anatomy-status">Anatomical atlas unavailable. Acoustic ellipsoids remain visible.</span></Html>}><Suspense fallback={<Html center><span className="anatomy-status">Loading anatomical atlas…</span></Html>}><Brain scenario={scenario} clips={clips} onTarget={onTarget} /></Suspense></AnatomyBoundary>}
+    {layers.brain && <AnatomyBoundary onError={onAnatomyError}><Suspense fallback={null}><Brain scenario={scenario} clips={clips} onTarget={onTarget} onReady={onAnatomyReady} /></Suspense></AnatomyBoundary>}
     {layers.scalp && <mesh scale={outer}><sphereGeometry args={[1, 72, 48]} /><meshPhysicalMaterial color="#718297" transparent opacity={.03} roughness={.25} side={THREE.DoubleSide} clippingPlanes={clips} depthWrite={false} /></mesh>}
     {layers.skull && [skullOuter, skullInner].map((radii, i) => <mesh key={i} scale={radii}><sphereGeometry args={[1, 72, 48]} /><meshStandardMaterial color="#dcc9aa" transparent opacity={i === 0 ? .04 : .025} side={THREE.DoubleSide} clippingPlanes={clips} depthWrite={false} /></mesh>)}
     <Line points={circle} color="#34525d" lineWidth={1} transparent opacity={.5} />
@@ -125,8 +121,12 @@ interface SceneProps { scenario: Scenario; field?: FieldPlane; normalization: nu
 export default function HeadScene(props: SceneProps) {
   const [unavailable, setUnavailable] = useState(false);
   const [fps, setFps] = useState<number>();
+  const [anatomy, setAnatomy] = useState<AnatomyLoadState>('loading');
+  const onAnatomyReady = useCallback(() => setAnatomy('ready'), []);
+  const onAnatomyError = useCallback(() => setAnatomy('error'), []);
   return <div className="scene-canvas">
-    <SceneErrorBoundary onError={() => setUnavailable(true)}>{unavailable ? sceneUnavailable : <Canvas camera={{ position: [.28, -.36, .23], up: [0, 0, 1], near: .001, far: 3, fov: 34 }} dpr={[1, 1.7]} gl={{ antialias: true, localClippingEnabled: true }} onCreated={({ gl }) => { gl.domElement.addEventListener('webglcontextlost', () => setUnavailable(true)); }}><Head {...props} /><FrameMeter onRate={setFps} /></Canvas>}</SceneErrorBoundary>
+    <SceneErrorBoundary onError={() => setUnavailable(true)}>{unavailable ? sceneUnavailable : <Canvas camera={{ position: [.28, -.36, .23], up: [0, 0, 1], near: .001, far: 3, fov: 34 }} dpr={[1, 1.7]} gl={{ antialias: true, localClippingEnabled: true }} onCreated={({ gl }) => { gl.domElement.addEventListener('webglcontextlost', () => setUnavailable(true)); }}><Head {...props} onAnatomyReady={onAnatomyReady} onAnatomyError={onAnatomyError} /><FrameMeter onRate={setFps} /></Canvas>}</SceneErrorBoundary>
+    {props.layers.brain && !unavailable && <AnatomyStatus state={anatomy} />}
     <span className="frame-meter">{unavailable ? '3D unavailable · numerical views remain active' : fps === undefined ? 'Measuring render cadence…' : `${fps.toFixed(0)} FPS · measured 1 s window`}</span>
   </div>;
 }

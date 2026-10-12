@@ -73,7 +73,20 @@ export function simulate(s:Scenario=defaultScenario()):SimulationResult {
   return {scenario:s,sequence,field,elementFields,baselineField,phantom,channels,reconstruction,baselineReconstruction,metrics:measured,timingsMs,modelVersion:MODEL_VERSION,numericBytes:arrays.reduce((a,v)=>a+v.byteLength,0)};
 }
 export async function optimizePlacement(s:Scenario,onProgress?:(completed:number,total:number)=>void):Promise<OptimizationResult>{
-  validate(s);const start=performance.now(),initial=20*Math.log10(Math.max(1e-12,targetPressure(s))),candidates:OptimizationResult['candidates']=[];
+  validate(s);const start=performance.now(),candidates:OptimizationResult['candidates']=[];
+  // Coarse in-plane intensity ratio, not a global whole-brain sidelobe bound.
+  const size=17,inset=s.medium.scalpThicknessM+s.medium.skullThicknessM+s.medium.fluidThicknessM,offTargetIndices:number[]=[];
+  for(let z=0;z<size;z++)for(let x=0;x<size;x++){
+    const point=pixelPosition(s,x,z,size);
+    if(distance(point,s.targetM)>.008&&point.reduce((sum,v,i)=>sum+(v/(s.medium.outerRadiiM[i]-inset))**2,0)<1)offTargetIndices.push(z*size+x);
+  }
+  if(!offTargetIndices.length)throw new Error('No in-brain off-target samples outside the 8 mm target zone; increase the field of view or adjust the target');
+  const score=(candidate:Scenario)=>{
+    const q=focusSequence(candidate),table=createPropagationTable(candidate,size),field=fieldPlane(candidate,q,size,table),pressure=targetPressure(candidate,q);
+    let offTarget=0;for(const index of offTargetIndices)offTarget=Math.max(offTarget,field.magnitude[index]);
+    return {pressure,objectiveDb:20*Math.log10(Math.max(1e-12,pressure)/Math.max(1e-12,offTarget))};
+  };
+  const initial=score(s).objectiveDb;
   let best=s,bestScore=initial;const total=27;
   for(const dr of [-.006,0,.006])for(const rx of [-.14,0,.14])for(const ry of [-.14,0,.14]){
     const radiusM=Math.max(.108,Math.min(.15,s.array.radiusM+dr)),delta:Vec3=[rx,ry,0],rotationRad=s.array.rotationRad.map((v,i)=>v+delta[i]) as Vec3;
@@ -82,7 +95,7 @@ export async function optimizePlacement(s:Scenario,onProgress?:(completed:number
       return {...e,position:u.map(v=>v*radiusM) as Vec3,normal:u.map(v=>-v) as Vec3};
     })}};
     const valid=candidate.array.elements.every(e=>e.position.reduce((sum,v,i)=>sum+(v/(s.medium.outerRadiiM[i]+.005))**2,0)>1&&candidate.array.elements.every(o=>o.id===e.id||distance(e.position,o.position)>=.008));
-    const pressure=valid?targetPressure(candidate):0,objectiveDb=20*Math.log10(Math.max(1e-12,pressure));candidates.push({rotationRad,radiusM,objectiveDb,targetPressure:pressure});
+    const {pressure,objectiveDb}=valid?score(candidate):{pressure:0,objectiveDb:-Infinity};candidates.push({rotationRad,radiusM,objectiveDb,targetPressure:pressure});
     if(valid&&objectiveDb>bestScore){bestScore=objectiveDb;best=candidate;}onProgress?.(candidates.length,total);
     await new Promise<void>(resolve=>setTimeout(resolve,0));
   }

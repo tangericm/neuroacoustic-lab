@@ -19,7 +19,7 @@ FFT Hilbert transformation produces analytic channel quadrature. Complex DAS int
 - Cyst contrast is mean envelope inside 0.8 cyst radii relative to the 1.2–1.8 radius annulus, expressed with 20log10.
 - Point localization searches the strongest reconstruction sample within 12 mm of the known central point. This is a local measured diagnostic, not unconstrained detection accuracy.
 - `numericBytes` counts returned typed-array payloads. It excludes JavaScript objects, transient FFT arrays, and the retained single-entry propagation cache (approximately 7.1 MB at default grid/array).
-- Optimization searches 27 bounded radius/rotation poses and maximizes exact target CW pressure at constant drive energy. It is a local deterministic enumeration, not a global design optimum. It yields between candidates; the UI may terminate a worker to cancel synchronous simulation.
+- Optimization searches 27 bounded radius/rotation poses at constant drive energy. The objective is `20log10(exact target pressure / maximum sampled off-target pressure)` on a 17×17 xz plane at target y, using the same FOV. Samples outside the brain or within 8 mm of the target are excluded. This pressure ratio in dB equals the corresponding intensity ratio in dB. It is a coarse in-plane local search, not a global whole-brain bound or global design optimum. The current propagation mode and apodization are preserved. It yields between candidates; the UI may terminate a worker to cancel synchronous simulation.
 
 The scalar model has no refraction, shear waves, multiple scattering, reverberation, nonlinear propagation, angle-dependent interface physics, broadband material dispersion, or CT-calibrated skull. Ellipsoid shell subtraction is not constant thickness along surface normals. The brain mesh is visualization only. Same-model Python oracle agreement is numerical verification, not physical validation. The separate k-Wave fixture tests another stated geometry.
 
@@ -75,3 +75,13 @@ Before/after measurements used the same Vite-loaded Node engine, unchanged 96×9
 First-run total decreased about 24%, and field computation about 41%, in these local measurements. This does not claim a browser latency: root is checking the actual browser while rendering.
 
 Prepared-solver oracle regression was recorded RED before implementation, then GREEN. Fresh complete suite at 10:38:48: **46/46 tests passed**, including independent oracle paths, complex individual-field summation, and invalidation checks. `npx tsc -b` passed. Numerical payload size and all displayed physical metrics are unchanged apart from floating-point roundoff at approximately 1e-15. No numerical approximation, grid reduction, or further performance refactor was introduced.
+
+## Optimizer objective correction, 10:51
+
+The initial implementation maximized target pressure alone and did not fulfill the approved target-to-off-target objective. It now uses the coarse in-plane ratio defined above for the initial pose and every valid candidate, reusing the prepared propagation tables and fixed-energy focusing sequence. The best reported objective is no worse than the initial objective. Candidate records retain both the ratio score and exact target pressure. A plane with no eligible off-target brain sample fails early with an intelligible error. No propagation mode is silently changed.
+
+Independent tests compute the ratio from sampled fields and exact target pressure without calling the optimizer's scoring implementation. They check initial, final, and a candidate score, and preserve homogeneous and uncorrected modes in addition to corrected mode. The initial RED test demonstrated a reported 7.943339 dB target-only score versus the independently expected 12.557374 dB ratio for its rotated input. An empty eligible mask also failed RED before the fix. Cached Float32 amplitudes require a 5e-6 dB score comparison tolerance.
+
+At 10:51:01, the full suite passed **51/51 tests across eight files**; TypeScript checks passed. Default search: **12.438509 → 13.453628 dB**, 27 candidates, selected radius **112 mm**, rotation **[0.14, 0.14, 0] rad**, target pressure **2.633234 relative units**, corrected mode retained.
+
+Measured search time varied by harness: approximately 0.46 s in the warmed Vitest process, 3.057 s in a fresh Vite SSR process, and 3.299 s in Vite SSR immediately after a 633.676 ms default simulation. These measurements include yielding between candidates and are not presented as actual-browser latency. The root's browser check is the source for browser responsiveness claims.

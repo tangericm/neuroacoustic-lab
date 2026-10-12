@@ -1,5 +1,15 @@
 import { expect, it } from 'vitest';
-import { defaultScenario, simulate, optimizePlacement, pathBetween, distance, acquireChannels, createPropagationTable, fieldPlane, buildArray, moveElement } from '../src/core';
+import { defaultScenario, simulate, optimizePlacement, pathBetween, distance, acquireChannels, createPropagationTable, fieldPlane, buildArray, moveElement, targetPressure } from '../src/core';
+import type { Scenario } from '../src/core';
+function independentlySampledObjective(s:Scenario):number{
+  const f=fieldPlane(s,undefined,17),depth=s.medium.scalpThicknessM+s.medium.skullThicknessM+s.medium.fluidThicknessM;let outside=0;
+  for(let row=0;row<17;row++)for(let col=0;col<17;col++){
+    const x=s.targetM[0]+(col/16-.5)*s.fieldOfViewM,y=s.targetM[1],z=s.targetM[2]+(.5-row/16)*s.fieldOfViewM;
+    const brain=(x/(s.medium.outerRadiiM[0]-depth))**2+(y/(s.medium.outerRadiiM[1]-depth))**2+(z/(s.medium.outerRadiiM[2]-depth))**2;
+    if(brain<1&&Math.hypot(x-s.targetM[0],z-s.targetM[2])>.008)outside=Math.max(outside,f.magnitude[row*17+col]);
+  }
+  return 20*Math.log10(targetPressure(s)/outside);
+}
 it('shares paths between field phases without changing physical amplitudes',()=>{
   const s=defaultScenario();s.gridSize=16;const table=createPropagationTable(s,16);
   const a=fieldPlane(s,undefined,16),b=fieldPlane(s,undefined,16,table);
@@ -33,9 +43,25 @@ it('deterministically improves or retains the pose without violating clearance/s
   const s=defaultScenario();s.array=buildArray(64,.118,[.1,.1,0]);let progress=0;const a=await optimizePlacement(s,n=>{progress=n;});
   expect(progress).toBe(27);expect(a.finalObjectiveDb).toBeGreaterThanOrEqual(a.initialObjectiveDb);
   expect(a.candidates).toHaveLength(27);
+  expect(a.initialObjectiveDb).toBeCloseTo(independentlySampledObjective(s),5);
+  expect(a.finalObjectiveDb).toBeCloseTo(independentlySampledObjective(a.scenario),5);
+  const first=a.candidates[0],firstScenario={...s,array:buildArray(64,first.radiusM,first.rotationRad)};
+  expect(first.objectiveDb).toBeCloseTo(independentlySampledObjective(firstScenario),5);
+  expect(first.targetPressure).toBeCloseTo(targetPressure(firstScenario),10);
   for(const e of a.scenario.array.elements)for(const other of a.scenario.array.elements)if(e.id!==other.id)expect(distance(e.position,other.position)).toBeGreaterThanOrEqual(.008);
   const e=a.scenario.array.elements[0],unchanged=moveElement(a.scenario,e.id,e.azimuthRad,e.polarRad);
   expect(distance(e.position,unchanged.array.elements[0].position)).toBeLessThan(1e-12);
+});
+it.each(['homogeneous','uncorrected'] as const)('retains %s physics and phases when optimizing the sampled ratio',async mode=>{
+  const s=defaultScenario();s.mode=mode;const r=await optimizePlacement(s);
+  expect(r.scenario.mode).toBe(mode);
+  expect(r.initialObjectiveDb).toBeCloseTo(independentlySampledObjective(s),5);
+  expect(r.finalObjectiveDb).toBeCloseTo(independentlySampledObjective(r.scenario),5);
+  expect(r.finalObjectiveDb).toBeGreaterThanOrEqual(r.initialObjectiveDb);
+});
+it('rejects optimization when no in-brain sample is outside the target exclusion zone',async()=>{
+  const s=defaultScenario();s.medium.outerRadiiM=[.02,.02,.02];s.targetM=[0,0,0];s.fieldOfViewM=.02;
+  await expect(optimizePlacement(s)).rejects.toThrow(/off-target/i);
 });
 it('reuses actual path geometry across assumed-speed edits and invalidates changed actual material',()=>{
   const s=defaultScenario();s.gridSize=16;const a=createPropagationTable(s);

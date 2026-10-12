@@ -14,6 +14,7 @@ This is an educational numerical experiment, not a medical device or a patient-s
 - A Web Worker simulation path that transfers numeric buffers and rejects stale results; the placement search can be canceled by terminating its worker.
 - Scenario JSON download, a shareable URL containing scenario settings, and a comparison-image export. Share links carry settings only; RF and image arrays remain in the browser.
 - A Reference view with frozen results from an independent 3D k-Wave fixture.
+- Vercel Web Analytics for visit statistics. Page-view URLs have query parameters and scenario hashes removed; there are no custom events carrying model settings, RF channels, or images.
 
 ## Run locally
 

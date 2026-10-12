@@ -16,3 +16,5 @@ Inspected on October 12, 2026 in the Codex Chromium in-app browser on the local 
 The source and lifecycle checks cover renderer failure fallback, stale worker results, owned geometry disposal, and reduced-motion behavior. Safari, Firefox, touch dragging, and operating-system reduced-motion preference were not independently exercised in this browser session. WebGPU is not used.
 
 Final publication checks and URLs are recorded in the implementation ledger.
+
+The live Vercel origin was checked without an authentication cookie: HTTP 200, complete anatomy, a default computation of 854 ms, both reference maps, and no new origin-specific error/warning logs. `docs/figures/workspace.jpg` records the live workspace. GitHub's Ubuntu CI passed both jobs.

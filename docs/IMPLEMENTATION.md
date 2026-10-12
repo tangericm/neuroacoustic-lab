@@ -29,4 +29,12 @@ Ruling: coordinate independent core, UI, and offline-reference work through the 
 
 ## Release
 
-GitHub and Vercel publication follows the final UI review and browser check. The deployed URL, commit, and CI outcome will be recorded here.
+Published on October 12, 2026:
+
+- Source: https://github.com/tangericm/ultrasound-lab
+- Production: https://ultrasound-lab-six.vercel.app
+- Verified implementation commit: `3c13c1a`; JavaScript asset: `index-BAtRLtqT.js`.
+- GitHub CI: https://github.com/tangericm/ultrasound-lab/actions/runs/38288748082 — both browser-core and float64-reference jobs passed on Ubuntu.
+- An unauthenticated HTTP request returned 200. The live browser loaded the atlas, computed the default case in 854 ms, and displayed the frozen full-wave comparisons. No new errors or warnings appeared for the deployed origin.
+- The live screenshot is retained in `docs/figures/workspace.jpg`.
+- Vercel project creation, CLI production deployment, and alias succeeded. The GitHub integration connection failed twice; automatic push deployment is not claimed. GitHub CI remains connected. Future publication uses the linked Vercel CLI until that integration is enabled.

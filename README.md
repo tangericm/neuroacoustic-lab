@@ -15,7 +15,7 @@ This is an educational numerical experiment, not a medical device or a patient-s
 - Playback repeats while playing; Pause stops it and Replay returns to the beginning. The imaging cine repeats the same recorded ensemble. Hidden/offscreen suspension and reduced-motion static views remain available.
 - An optional [advanced lab](https://neuroacoustic-lab.vercel.app/?view=lab) with movable elements, target and material controls, three focusing modes, element inspection, and a bounded array-pose search at fixed total squared drive weights. Open `?view=lab`; legacy `#s=` scenario links also open the advanced lab.
 - The advanced lab retains its Web Worker simulation, transferable numeric buffers, stale-result rejection, cancelable placement search, scenario JSON and image export, and shareable settings URLs. Share links carry settings only; RF and image arrays remain in the browser. Its Reference view contains frozen results from an independent 3D k-Wave fixture.
-- Vercel Web Analytics for visit statistics. Page-view URLs have query parameters and scenario hashes removed; there are no custom events carrying model settings, RF channels, or images.
+- Vercel Web Analytics for visit statistics and Speed Insights for page performance. Both remove query parameters and scenario hashes from reported URLs; there are no custom events carrying model settings, RF channels, or images.
 
 ## Run locally
 

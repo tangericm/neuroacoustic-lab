@@ -76,4 +76,4 @@ The application code in this repository is licensed under MIT; see [LICENSE](LIC
 
 For a manual Vercel deployment, import the GitHub repository, select the Vite framework preset, set the build command to `npm run build`, and set the output directory to `dist`. No server-side runtime or account backend is required.
 
-The production demo is published at [neuroacoustic-lab.vercel.app](https://neuroacoustic-lab.vercel.app). GitHub Actions checks the core, independent Python reference tests, and static build on each push. Vercel is connected to `tangericm/ultrasound-lab` with `main` as the production branch, so pushes also trigger production deployments. The original `ultrasound-lab-six.vercel.app` address redirects to the current domain.
+The production demo is published at [neuroacoustic-lab.vercel.app](https://neuroacoustic-lab.vercel.app). GitHub Actions checks the core, independent Python reference tests, and static build on each push. Vercel is connected to `tangericm/neuroacoustic-lab` with `main` as the production branch, so pushes also trigger production deployments. The original `ultrasound-lab-six.vercel.app` address redirects to the current domain.
